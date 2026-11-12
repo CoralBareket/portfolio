@@ -1,0 +1,16 @@
+{
+  "name": "@portfolio/rules-tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "echo 'rules tests run with test:emulators'",
+    "test:emulators": "vitest run",
+    "build": "echo 'nothing to build'"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "firebase": "^13.3.0"
+  }
+}
