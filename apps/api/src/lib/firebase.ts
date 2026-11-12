@@ -2,6 +2,7 @@ import { cert, getApps, initializeApp, type App } from 'firebase-admin/app';
 import { getAuth, type Auth } from 'firebase-admin/auth';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { env, isProd } from './env';
+import { notConfigured } from './errors';
 import { logger } from './logger';
 
 export type FirebaseClients = { db: Firestore; auth: Auth };
@@ -41,4 +42,17 @@ export function getFirebase(): FirebaseClients | null {
     cached = { db: getFirestore(app), auth: getAuth(app) };
   }
   return cached;
+}
+
+/** Firestore, or a 503 "not configured" error for endpoints that can't work without it. */
+export function requireDb(): Firestore {
+  const fb = getFirebase();
+  if (!fb) throw notConfigured('Firebase');
+  return fb.db;
+}
+
+export function requireAuth(): Auth {
+  const fb = getFirebase();
+  if (!fb) throw notConfigured('Firebase');
+  return fb.auth;
 }

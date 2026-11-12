@@ -1,12 +1,16 @@
 import { defineConfig } from 'vitest/config';
 
+// Unit tests (src/) never touch a database. Integration tests (tests/) run under
+// `firebase emulators:exec`, which sets FIRESTORE_EMULATOR_HOST / FIREBASE_AUTH_EMULATOR_HOST.
 export default defineConfig({
   test: {
     env: {
       NODE_ENV: 'test',
+      LOG_LEVEL: 'fatal',
       FIREBASE_PROJECT_ID: 'demo-portfolio',
-      FIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST ?? '127.0.0.1:8080',
-      FIREBASE_AUTH_EMULATOR_HOST: process.env.FIREBASE_AUTH_EMULATOR_HOST ?? '127.0.0.1:9099',
+      CLOUDINARY_CLOUD_NAME: 'demo-cloud',
+      CLOUDINARY_API_KEY: 'test-key',
+      CLOUDINARY_API_SECRET: 'test-secret',
     },
   },
 });

@@ -14,3 +14,5 @@ export class AppError extends Error {
 }
 
 export const notFound = (what: string) => new AppError(404, 'not_found', `${what} not found`);
+export const notConfigured = (what: string) =>
+  new AppError(503, 'not_configured', `${what} is not configured (see .env.example)`);

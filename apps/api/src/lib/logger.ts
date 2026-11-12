@@ -5,7 +5,8 @@ import { env, isProd } from './env';
 export const logger = pino({
   level: env.LOG_LEVEL,
   base: { service: 'portfolio-api' },
-  redact: ['req.headers.authorization', '*.email', '*.message'],
+  // Never log secrets or visitors' personal data.
+  redact: ['req.headers.authorization', 'contact.email', 'contact.message', 'mail.to', 'mail.replyTo'],
   ...(isProd || env.NODE_ENV === 'test'
     ? {}
     : { transport: { target: 'pino-pretty', options: { colorize: true, translateTime: 'HH:MM:ss' } } }),
