@@ -3,7 +3,7 @@ import { useContent } from '../lib/content';
 import { PipelineVisual } from './PipelineVisual';
 
 export function Hero({ workHref }: { workHref: string }) {
-  const { content } = useContent();
+  const { content, cvAvailable } = useContent();
   const { hero } = content;
 
   return (
@@ -45,12 +45,15 @@ export function Hero({ workHref }: { workHref: string }) {
           >
             Explore my work <ArrowRight size={18} aria-hidden="true" />
           </a>
-          <a
-            href="/api/cv"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-5 py-3 font-semibold transition hover:border-accent hover:text-accent"
-          >
-            <Download size={18} aria-hidden="true" /> Download CV
-          </a>
+          {cvAvailable && (
+            <a
+              href="/api/cv"
+              data-track="cv"
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-5 py-3 font-semibold transition hover:border-accent hover:text-accent"
+            >
+              <Download size={18} aria-hidden="true" /> Download CV
+            </a>
+          )}
           <a
             href="#contact"
             className="inline-flex items-center gap-2 rounded-lg px-5 py-3 font-semibold text-muted transition hover:text-accent"

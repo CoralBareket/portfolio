@@ -2,6 +2,9 @@
 export const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined) ?? 'https://coralbareket.vercel.app';
 
+/** localStorage key the analytics tracker checks so the admin's own visits are never counted. */
+export const ANALYTICS_EXCLUDE_KEY = 'cb_exclude';
+
 export type SectionId = 'stack' | 'focus' | 'experience' | 'projects' | 'about' | 'contact';
 
 export type SectionDef = { id: SectionId; label: string; slug: string };

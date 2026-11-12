@@ -1,13 +1,14 @@
 import { Mail, Send } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { contactInputSchema } from '@portfolio/shared';
 import { Reveal } from '../components/Reveal';
+import { Turnstile, type TurnstileHandle } from '../components/Turnstile';
 import { GithubIcon, LinkedinIcon } from '../components/icons';
 import { useContent } from '../lib/content';
 
 const fieldsSchema = contactInputSchema.pick({ name: true, email: true, message: true });
 type Field = 'name' | 'email' | 'message';
-type Status = 'idle' | 'sending' | 'sent' | 'error';
+type Status = 'idle' | 'sending' | 'sent' | 'error' | 'captcha' | 'limited';
 
 const inputClass =
   'mt-1.5 w-full rounded-lg border border-border bg-bg px-3.5 py-2.5 text-text placeholder:text-muted/70 focus:border-accent focus:outline-none';
@@ -17,6 +18,8 @@ export function Contact() {
   const { links } = content;
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [status, setStatus] = useState<Status>('idle');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const captcha = useRef<TurnstileHandle>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,18 +42,28 @@ export function Contact() {
       return;
     }
     setErrors({});
+    if (!captchaToken) {
+      setStatus('captcha');
+      return;
+    }
     setStatus('sending');
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...parsed.data, website: data.website ?? '', turnstileToken: 'pending' }),
+        body: JSON.stringify({ ...parsed.data, website: data.website ?? '', turnstileToken: captchaToken }),
       });
-      if (!res.ok) throw new Error(String(res.status));
-      setStatus('sent');
-      form.reset();
+      if (res.status === 429) setStatus('limited');
+      else if (!res.ok) throw new Error(String(res.status));
+      else {
+        setStatus('sent');
+        form.reset();
+      }
     } catch {
       setStatus('error');
+    } finally {
+      // Tokens are single-use: get a fresh one for any further message.
+      captcha.current?.reset();
     }
   }
 
@@ -150,7 +163,11 @@ export function Contact() {
             <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-4">
+          <div className="mt-5">
+            <Turnstile ref={captcha} onToken={setCaptchaToken} />
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-4">
             <button
               type="submit"
               disabled={status === 'sending'}
@@ -161,6 +178,14 @@ export function Contact() {
             <p id="contact-status" role="status" className="text-sm">
               {status === 'sent' && (
                 <span className="text-accent">Thanks! I&apos;ll get back to you soon.</span>
+              )}
+              {status === 'captcha' && (
+                <span className="text-red-300">Please complete the quick check above first.</span>
+              )}
+              {status === 'limited' && (
+                <span className="text-red-300">
+                  Too many messages for now. Please email me at {links.email}.
+                </span>
               )}
               {status === 'error' && (
                 <span className="text-red-300">
