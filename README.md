@@ -36,8 +36,28 @@ apps/api          Hono REST API: routes → services → repositories
 packages/shared   zod schemas + TypeScript types shared by web and api
 firebase/         Firestore rules, indexes, emulator config
 tests/rules       Firestore security-rules tests
-scripts/          one-off admin scripts
+scripts/          seed + grant-admin scripts
 ```
+
+## API
+
+All responses are JSON; errors use one envelope: `{ "error": { "code", "message", "details?" } }`.
+
+| Method              | Path                        | Auth                   | Purpose                                               |
+| ------------------- | --------------------------- | ---------------------- | ----------------------------------------------------- |
+| GET                 | `/api/health`               | –                      | Health check                                          |
+| GET                 | `/api/content`              | –                      | Site content + published projects (CDN-cached 5 min)  |
+| GET                 | `/api/projects/:slug`       | –                      | One published project                                 |
+| GET                 | `/api/cv`                   | –                      | Counts the download, redirects to the PDF             |
+| POST                | `/api/contact`              | Turnstile + rate limit | Saves the message, emails it (Reply-To = sender)      |
+| GET/PUT             | `/api/admin/content`        | admin                  | Edit hero, skills, focus, experience, about, settings |
+| GET/POST/PUT/DELETE | `/api/admin/projects[/:id]` | admin                  | Manage projects                                       |
+| POST                | `/api/admin/uploads/sign`   | admin                  | Signed direct-to-Cloudinary upload                    |
+| GET/PUT             | `/api/admin/cv`             | admin                  | Current CV / replace it                               |
+| GET/PATCH           | `/api/admin/messages[/:id]` | admin                  | Inbox, mark read / archive                            |
+
+Admin routes verify a Firebase ID token **and** an `admin` custom claim, granted once with
+`pnpm admin:grant <email>`. Signing in alone grants nothing.
 
 ## Run locally
 
