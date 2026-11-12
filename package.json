@@ -8,10 +8,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "concurrently -k -n emu,seed,api,web -c yellow,gray,cyan,magenta \"pnpm emulators\" \"pnpm seed:wait\" \"pnpm --filter @portfolio/api dev\" \"pnpm --filter @portfolio/web dev\"",
-    "emulators": "firebase emulators:start --project demo-portfolio --config firebase/firebase.json",
-    "seed": "tsx scripts/seed.ts",
-    "seed:wait": "tsx scripts/wait-for-emulators.ts && pnpm seed",
+    "start": "concurrently -k -n api,web -c cyan,magenta \"pnpm --filter @portfolio/api dev\" \"pnpm --filter @portfolio/web dev\"",
+    "dev": "pnpm start",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -19,7 +17,7 @@
     "test": "pnpm -r test",
     "test:emulators": "firebase emulators:exec --project demo-portfolio --config firebase/firebase.json --only firestore,auth \"pnpm -r test:emulators\"",
     "build": "pnpm -r build",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:emulators && pnpm build"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

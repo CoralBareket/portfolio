@@ -36,21 +36,23 @@ apps/api          Hono REST API: routes → services → repositories
 packages/shared   zod schemas + TypeScript types shared by web and api
 firebase/         Firestore rules, indexes, emulator config
 tests/rules       Firestore security-rules tests
-scripts/          seed + one-off admin scripts
+scripts/          one-off admin scripts
 ```
 
 ## Run locally
 
-Requirements: Node 24 (`nvm use`), pnpm (`corepack enable pnpm`), Java 21 (for the Firebase emulators).
+Requirements: Node 24 (`nvm use`) and pnpm (`corepack enable pnpm`).
 
 ```bash
 pnpm install
 cp .env.example .env.local
-pnpm dev          # web :5173 · api :8787 · emulator UI :4000 (seeded)
-pnpm check        # lint, format, typecheck, unit + emulator tests, build
+pnpm start        # site on http://localhost:3000, API proxied at /api
+pnpm check        # lint, format, typecheck, unit tests, build
 ```
 
-Local development only ever talks to the Firebase Emulator Suite (`demo-portfolio`), never to production.
+Without Firebase credentials in `.env.local`, the API serves the built-in CV content. Local development
+can be connected to a separate free **dev** Firebase project, never to production. Firestore
+security-rules and integration tests run against the Firebase emulators inside the deploy workflow.
 
 ## Deployment
 

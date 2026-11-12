@@ -5,7 +5,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    port: 5173,
+    port: 3000,
+    strictPort: true,
+    open: true,
     // Same-origin /api in dev too, just like production on Vercel.
     proxy: { '/api': 'http://localhost:8787' },
   },
