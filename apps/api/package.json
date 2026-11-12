@@ -7,7 +7,7 @@
     "dev": "tsx watch --env-file-if-exists=../../.env.local src/dev-server.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --dir src",
-    "test:emulators": "vitest run --dir tests",
+    "test:emulators": "vitest run --dir tests --no-file-parallelism",
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
