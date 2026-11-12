@@ -1,0 +1,42 @@
+{
+  "name": "coral-bareket-portfolio",
+  "private": true,
+  "description": "Coral Bareket's portfolio: React + Vite frontend, Hono API on Vercel, Firebase.",
+  "type": "module",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n emu,seed,api,web -c yellow,gray,cyan,magenta \"pnpm emulators\" \"pnpm seed:wait\" \"pnpm --filter @portfolio/api dev\" \"pnpm --filter @portfolio/web dev\"",
+    "emulators": "firebase emulators:start --project demo-portfolio --config firebase/firebase.json",
+    "seed": "tsx scripts/seed.ts",
+    "seed:wait": "tsx scripts/wait-for-emulators.ts && pnpm seed",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:emulators": "firebase emulators:exec --project demo-portfolio --config firebase/firebase.json --only firestore,auth \"pnpm -r test:emulators\"",
+    "build": "pnpm -r build",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:emulators && pnpm build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "@types/node": "^24.0.0",
+    "concurrently": "^10.0.7",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "firebase": "^13.3.0",
+    "firebase-admin": "^14.5.1",
+    "firebase-tools": "^15.36.0",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^5.1.0"
+  }
+}

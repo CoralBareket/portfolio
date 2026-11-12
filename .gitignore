@@ -1,0 +1,19 @@
+node_modules/
+dist/
+coverage/
+.vercel/
+*.log
+.DS_Store
+
+# env & secrets: never commit
+.env
+.env.*
+!.env.example
+*service-account*.json
+
+# local files
+cv.pdf
+firebase/.emulator-data/
+playwright-report/
+test-results/
+.vite-react-ssg-temp
