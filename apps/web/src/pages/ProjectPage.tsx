@@ -6,26 +6,30 @@ import { Head } from 'vite-react-ssg';
 import type { Project } from '@portfolio/shared';
 import { ArchitectureFlow } from '../components/ArchitectureFlow';
 import { GithubIcon } from '../components/icons';
+import { buildData } from '../lib/build-data';
 import { SITE_URL } from '../lib/site';
 import { usePageTracking } from '../lib/usePageTracking';
 
 type State = { status: 'loading' } | { status: 'missing' } | { status: 'ready'; project: Project };
 
-/** Pre-rendered per published project at build time; fetched client-side for newer ones. */
-export function ProjectPage({ initial }: { initial?: Project }) {
+/**
+ * Published projects are pre-rendered from the build snapshot (full HTML + meta tags);
+ * newer ones are served a loading shell and fetched. Either way, the API refreshes the data.
+ */
+export function ProjectPage() {
   usePageTracking();
   const { slug = '' } = useParams();
+  const initial = buildData.projects.find((p) => p.slug === slug);
   const [state, setState] = useState<State>(
     initial ? { status: 'ready', project: initial } : { status: 'loading' },
   );
 
   useEffect(() => {
-    if (initial) return;
     fetch(`/api/projects/${encodeURIComponent(slug)}`)
       .then((res) => (res.ok ? (res.json() as Promise<{ project: Project }>) : Promise.reject(new Error())))
       .then(({ project }) => setState({ status: 'ready', project }))
-      .catch(() => setState({ status: 'missing' }));
-  }, [slug, initial]);
+      .catch(() => setState((prev) => (prev.status === 'ready' ? prev : { status: 'missing' })));
+  }, [slug]);
 
   return (
     <MotionConfig reducedMotion="user">

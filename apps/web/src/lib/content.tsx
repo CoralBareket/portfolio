@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { defaultContent, type PublicContentResponse } from '@portfolio/shared';
+import type { PublicContentResponse } from '@portfolio/shared';
+import { buildData } from './build-data';
 
-const initialState: PublicContentResponse = { content: defaultContent, projects: [], cvAvailable: false };
+const initialState: PublicContentResponse = buildData;
 const ContentContext = createContext<PublicContentResponse>(initialState);
 
 /**
