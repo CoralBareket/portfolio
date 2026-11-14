@@ -2,20 +2,18 @@ import type { AnalyticsEvent, EventBatch } from '@portfolio/shared';
 import { ANALYTICS_EXCLUDE_KEY } from './site';
 
 /**
- * First-party, privacy-friendly analytics (~2 KB).
- * - Anonymous random ID in localStorage; no cookies, no IP, no fingerprinting.
- * - The browser works out "first visit today / new visitor / new session" itself,
- *   so the server never has to read anything to count uniques.
+ * First-party, privacy-friendly analytics (~1.5 KB).
+ * - No visitor ID, no cookies, no IP, no fingerprinting: only a per-tab session flag
+ *   in sessionStorage, which the browser forgets when the tab closes.
  * - Events are batched and sent with navigator.sendBeacon.
  * - Off for Do-Not-Track / Global Privacy Control, automation, the admin, and /admin.
  */
 
 const ENDPOINT = '/api/events';
 const FLUSH_MS = 15_000;
-const KEYS = { visitor: 'cb_vid', lastDay: 'cb_day', session: 'cb_sid', sections: 'cb_sec' } as const;
+const KEYS = { session: 'cb_sid', sections: 'cb_sec' } as const;
 
-type Flags = Pick<EventBatch, 'firstVisitToday' | 'isNewVisitor' | 'newSession'>;
-type State = { queue: AnalyticsEvent[]; flags: Flags; referrer: string; lastPath: string };
+type State = { queue: AnalyticsEvent[]; newSession: boolean; referrer: string; lastPath: string };
 
 let state: State | null | undefined; // undefined = not initialised, null = disabled
 
@@ -34,14 +32,6 @@ const set = (store: Storage, key: string, value: string) => {
   }
 };
 
-const israelDay = () =>
-  new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Jerusalem',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date());
-
 function isOptedOut(): boolean {
   const nav = navigator as Navigator & { globalPrivacyControl?: boolean };
   const w = window as Window & { doNotTrack?: string };
@@ -59,19 +49,12 @@ function init(): State | null {
   if (state !== undefined) return state;
   if (typeof window === 'undefined' || isOptedOut()) return (state = null);
 
-  const isNewVisitor = !get(localStorage, KEYS.visitor);
-  if (isNewVisitor) set(localStorage, KEYS.visitor, crypto.randomUUID());
-
-  const today = israelDay();
-  const firstVisitToday = get(localStorage, KEYS.lastDay) !== today;
-  set(localStorage, KEYS.lastDay, today);
-
   const newSession = !get(sessionStorage, KEYS.session);
   if (newSession) set(sessionStorage, KEYS.session, '1');
 
   state = {
     queue: [],
-    flags: { firstVisitToday, isNewVisitor, newSession },
+    newSession,
     referrer: newSession ? document.referrer.slice(0, 300) : '',
     lastPath: '',
   };
@@ -86,17 +69,12 @@ function init(): State | null {
 function flush(): void {
   const s = state;
   if (!s) return;
-  const pendingFlags = s.flags.firstVisitToday || s.flags.isNewVisitor || s.flags.newSession;
-  if (s.queue.length === 0 && !pendingFlags) return;
+  if (s.queue.length === 0 && !s.newSession) return;
 
-  const batch: EventBatch = {
-    ...s.flags,
-    referrer: s.referrer,
-    events: s.queue.splice(0, 30),
-  };
+  const batch: EventBatch = { newSession: s.newSession, referrer: s.referrer, events: s.queue.splice(0, 30) };
   const body = JSON.stringify(batch);
-  // One-time flags are sent exactly once.
-  s.flags = { firstVisitToday: false, isNewVisitor: false, newSession: false };
+  // The visit (and its source) is counted exactly once.
+  s.newSession = false;
   s.referrer = '';
 
   const sent = navigator.sendBeacon?.(ENDPOINT, new Blob([body], { type: 'text/plain' }));

@@ -25,8 +25,6 @@ describe('analytics pipeline (emulator)', () => {
     // Two visitors: one from LinkedIn who scrolls and clicks, one direct.
     await beacon(
       {
-        firstVisitToday: true,
-        isNewVisitor: true,
         newSession: true,
         referrer: 'https://www.linkedin.com/',
         events: [{ type: 'pageview', path: '/' }],
@@ -35,8 +33,6 @@ describe('analytics pipeline (emulator)', () => {
     );
     await beacon(
       {
-        firstVisitToday: false,
-        isNewVisitor: false,
         newSession: false,
         events: [
           { type: 'section_view', section: 'stack' },
@@ -48,8 +44,6 @@ describe('analytics pipeline (emulator)', () => {
     );
     await beacon(
       {
-        firstVisitToday: true,
-        isNewVisitor: false,
         newSession: true,
         events: [{ type: 'pageview', path: '/' }],
       },
@@ -62,7 +56,7 @@ describe('analytics pipeline (emulator)', () => {
     expect(res.status).toBe(200);
     const s = (await res.json()) as AnalyticsSummary;
 
-    expect(s.totals).toMatchObject({ pageviews: 2, uniques: 2, sessions: 2, newVisitors: 1 });
+    expect(s.totals).toMatchObject({ pageviews: 2, sessions: 2 });
     expect(s.referrers).toEqual(
       expect.arrayContaining([
         ['LinkedIn', 1],
@@ -78,8 +72,8 @@ describe('analytics pipeline (emulator)', () => {
     });
     expect(csv.headers.get('content-type')).toContain('text/csv');
     const lines = (await csv.text()).trim().split('\n');
-    expect(lines[0]).toBe('date,pageviews,uniques,sessions,newVisitors,cvDownloads,contacts');
-    expect(lines[1]).toMatch(/^\d{4}-\d{2}-\d{2},2,2,2,1,0,0$/);
+    expect(lines[0]).toBe('date,pageviews,cvDownloads,contacts');
+    expect(lines[1]).toMatch(/^\d{4}-\d{2}-\d{2},2,0,0$/);
   });
 
   it('cleanup cron requires the secret', async () => {

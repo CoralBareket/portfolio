@@ -134,15 +134,11 @@ export const analyticsEventSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('click'), target: z.enum(clickTargets) }),
 ]);
 /**
- * The browser computes these one-time flags itself (and sends `true` only once), so the
- * server counts unique visitors, sessions and new visitors with zero database reads.
+ * One analytics batch. The only state the browser keeps is a per-tab session flag
+ * (sessionStorage), so there is no long-lived visitor ID at all.
  */
 export const eventBatchSchema = z.object({
-  /** First time this browser is seen today (Israel time) → counts one unique visitor. */
-  firstVisitToday: z.boolean(),
-  /** First time this browser is ever seen → counts one new visitor. */
-  isNewVisitor: z.boolean(),
-  /** First batch of a browser session → counts one session (with its referrer and device). */
+  /** First batch of a browser session → counts one visit, with its traffic source. */
   newSession: z.boolean(),
   referrer: z.string().max(300).default(''),
   events: z.array(analyticsEventSchema).max(30),
@@ -155,9 +151,8 @@ export type AnalyticsRange = (typeof analyticsRanges)[number];
 
 export type AnalyticsTotals = {
   pageviews: number;
-  uniques: number;
+  /** Visits (browser sessions): the denominator for source and section-reach shares. */
   sessions: number;
-  newVisitors: number;
   cvDownloads: number;
   contacts: number;
 };
@@ -167,16 +162,11 @@ export type AnalyticsSummary = {
   from: string;
   to: string;
   totals: AnalyticsTotals;
-  /** Same-length period right before `from`; null for "all". */
-  previous: AnalyticsTotals | null;
-  daily: { date: string; pageviews: number; uniques: number }[];
+  daily: { date: string; pageviews: number }[];
   /** Breakdowns, each sorted by count (desc). */
-  pages: [string, number][];
   referrers: [string, number][];
   sections: [string, number][];
   clicks: [string, number][];
-  /** Page views by hour of day (Israel time), index 0–23. */
-  hours: number[];
   insights: string[];
 };
 

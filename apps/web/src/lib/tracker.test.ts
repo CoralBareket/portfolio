@@ -22,7 +22,7 @@ describe('tracker', () => {
   });
   afterEach(() => vi.useRealTimers());
 
-  it('sends the first page view with one-time visitor/session flags, then never repeats them', async () => {
+  it('sends the first page view with the one-time visit flag, then never repeats it', async () => {
     trackPageview('/');
     vi.advanceTimersByTime(1600);
     trackPageview('/projects/demo');
@@ -30,25 +30,13 @@ describe('tracker', () => {
 
     const [first, second] = await sentBatches();
     expect(first).toMatchObject({
-      firstVisitToday: true,
-      isNewVisitor: true,
       newSession: true,
       events: [{ type: 'pageview', path: '/' }],
     });
     expect(second).toMatchObject({
-      firstVisitToday: false,
-      isNewVisitor: false,
       newSession: false,
       events: [{ type: 'pageview', path: '/projects/demo' }],
     });
-  });
-
-  it('a returning visitor in a new session is not counted as new', async () => {
-    localStorage.setItem('cb_vid', 'existing');
-    trackPageview('/');
-    vi.advanceTimersByTime(1600);
-    const [batch] = await sentBatches();
-    expect(batch).toMatchObject({ isNewVisitor: false, newSession: true });
   });
 
   it('respects Do-Not-Track', () => {
@@ -56,6 +44,12 @@ describe('tracker', () => {
     trackPageview('/');
     vi.advanceTimersByTime(20_000);
     expect(sendBeacon).not.toHaveBeenCalled();
+  });
+
+  it('keeps nothing in localStorage', () => {
+    trackPageview('/');
+    vi.advanceTimersByTime(2000);
+    expect(localStorage.length).toBe(0);
   });
 
   it("never counts the admin's own visits", () => {

@@ -13,8 +13,8 @@ const SECTION_NAMES: Record<string, string> = {
   about: 'About',
   contact: 'Contact',
 };
-const TOTAL_KEYS = ['pageviews', 'uniques', 'sessions', 'newVisitors', 'cvDownloads', 'contacts'] as const;
-const MAP_KEYS = ['pages', 'referrers', 'sections', 'clicks'] as const;
+const TOTAL_KEYS = ['pageviews', 'sessions', 'cvDownloads', 'contacts'] as const;
+const MAP_KEYS = ['referrers', 'sections', 'clicks'] as const;
 
 /** YYYY-MM-DD arithmetic on calendar days (UTC-based, so no DST surprises). */
 export const addDays = (day: string, n: number) =>
@@ -41,113 +41,77 @@ function sumMap(docs: DailyStatsDoc[], key: string): [string, number][] {
 }
 
 const pct = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 100) : 0);
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 /** Short, plain-language observations for the dashboard. */
-export function buildInsights(s: Omit<AnalyticsSummary, 'insights'>, periodLabel: string): string[] {
-  const out: string[] = [];
-  const { totals, previous } = s;
+export function buildInsights(s: Omit<AnalyticsSummary, 'insights'>): string[] {
+  const { totals } = s;
   if (totals.pageviews === 0) return ['No visits recorded in this period yet.'];
-
-  if (previous && previous.pageviews > 0) {
-    const change = pct(totals.pageviews - previous.pageviews, previous.pageviews);
-    const top = s.referrers[0];
-    const via = top && top[0] !== 'Direct' ? `, mostly from ${top[0]}` : '';
-    if (change !== 0)
-      out.push(
-        `Views ${change > 0 ? 'up' : 'down'} ${Math.abs(change)}% vs the previous ${periodLabel}${via}.`,
-      );
-    else out.push(`Views are flat vs the previous ${periodLabel}.`);
-  }
+  const out: string[] = [];
 
   const topSource = s.referrers[0];
   if (topSource && totals.sessions > 0) {
-    out.push(`${topSource[0]} brought ${pct(topSource[1], totals.sessions)}% of sessions.`);
+    out.push(`${topSource[0]} brought ${pct(topSource[1], totals.sessions)}% of visits.`);
   }
 
   const reach = new Map(s.sections);
   const base = Math.max(0, ...SECTION_ORDER.map((id) => reach.get(id) ?? 0));
   if (base > 0) {
     const dropAt = SECTION_ORDER.find((id) => (reach.get(id) ?? 0) / base < 0.5);
-    if (dropAt) out.push(`Most visitors leave before the ${SECTION_NAMES[dropAt]} section.`);
-    else out.push('Most visitors scroll all the way to Contact.');
-  }
-
-  if (totals.uniques > 0) {
     out.push(
-      `${pct(totals.cvDownloads, totals.uniques)}% of visitors downloaded the CV and ${pct(totals.contacts, totals.uniques)}% sent a message.`,
+      dropAt
+        ? `Most visitors leave before the ${SECTION_NAMES[dropAt]} section.`
+        : 'Most visitors scroll all the way to Contact.',
     );
   }
 
-  const peak = s.hours.reduce((best, v, h) => (v > (s.hours[best] ?? 0) ? h : best), 0);
-  if ((s.hours[peak] ?? 0) > 0) {
-    const hh = String(peak).padStart(2, '0');
-    out.push(`Busiest hour: ${hh}:00–${String((peak + 1) % 24).padStart(2, '0')}:00 (Israel time).`);
-  }
-
-  return out.slice(0, 6);
+  out.push(
+    `${plural(totals.cvDownloads, 'CV download')} and ${plural(totals.contacts, 'message')} in this period.`,
+  );
+  return out;
 }
 
 /** Pure aggregation of daily docs into the dashboard payload. */
 export function summarize(
   range: AnalyticsRange,
-  current: DailyStatsDoc[],
-  previous: DailyStatsDoc[] | null,
+  docs: DailyStatsDoc[],
   from: string,
   to: string,
 ): AnalyticsSummary {
-  const byDate = new Map(current.map((d) => [d.date, d]));
+  const byDate = new Map(docs.map((d) => [d.date, d]));
   const length = Math.min(daysBetween(from, to), 366);
   const daily = Array.from({ length }, (_, i) => {
     const date = addDays(to, i - length + 1);
-    const d = byDate.get(date);
-    return { date, pageviews: num(d?.pageviews), uniques: num(d?.uniques) };
+    return { date, pageviews: num(byDate.get(date)?.pageviews) };
   });
-
-  const maps = Object.fromEntries(MAP_KEYS.map((k) => [k, sumMap(current, k)])) as Record<
+  const maps = Object.fromEntries(MAP_KEYS.map((k) => [k, sumMap(docs, k)])) as Record<
     (typeof MAP_KEYS)[number],
     [string, number][]
   >;
-  const hourMap = new Map(sumMap(current, 'hours'));
-  const hours = Array.from({ length: 24 }, (_, h) => hourMap.get(String(h).padStart(2, '0')) ?? 0);
+  const base = { range, from, to, totals: sumTotals(docs), daily, ...maps };
+  return { ...base, insights: buildInsights(base) };
+}
 
-  const base = {
-    range,
-    from,
-    to,
-    totals: sumTotals(current),
-    previous: previous ? sumTotals(previous) : null,
-    daily,
-    ...maps,
-    hours,
-  };
-  const label = range === 'all' ? 'period' : `${RANGE_DAYS[range]} days`;
-  return { ...base, insights: buildInsights(base, label) };
+function bounds(range: AnalyticsRange, now: Date): { from: string; to: string } {
+  const to = israelDay(now);
+  return { from: range === 'all' ? '2000-01-01' : addDays(to, -(RANGE_DAYS[range] - 1)), to };
 }
 
 export const analyticsService = {
+  /** One query over small daily docs: a 90-day view reads at most 90 documents. */
   async summary(range: AnalyticsRange, now = new Date()): Promise<AnalyticsSummary> {
-    const to = israelDay(now);
-    if (range === 'all') {
-      const docs = await statsRepository.listRange('2000-01-01', to);
-      const first = docs.map((d) => d.date).sort()[0] ?? to;
-      return summarize(range, docs, null, first, to);
-    }
-    const days = RANGE_DAYS[range];
-    const from = addDays(to, -(days - 1));
-    const [current, previous] = await Promise.all([
-      statsRepository.listRange(from, to),
-      statsRepository.listRange(addDays(from, -days), addDays(from, -1)),
-    ]);
-    return summarize(range, current, previous, from, to);
+    const { from, to } = bounds(range, now);
+    const docs = await statsRepository.listRange(from, to);
+    const first = range === 'all' ? (docs.map((d) => d.date).sort()[0] ?? to) : from;
+    return summarize(range, docs, first, to);
   },
 
-  /** One CSV row per recorded day in the range (a single Firestore query). */
+  /** One CSV row per recorded day in the range. */
   async csv(range: AnalyticsRange, now = new Date()): Promise<string> {
-    const to = israelDay(now);
-    const from = range === 'all' ? '2000-01-01' : addDays(to, -(RANGE_DAYS[range] - 1));
+    const { from, to } = bounds(range, now);
     const docs = (await statsRepository.listRange(from, to)).sort((a, b) => a.date.localeCompare(b.date));
-    const header = ['date', ...TOTAL_KEYS].join(',');
-    const rows = docs.map((d) => [d.date, ...TOTAL_KEYS.map((k) => num(d[k]))].join(','));
-    return [header, ...rows].join('\n') + '\n';
+    const cols = ['pageviews', 'cvDownloads', 'contacts'] as const;
+    const rows = docs.map((d) => [d.date, ...cols.map((k) => num(d[k]))].join(','));
+    return [['date', ...cols].join(','), ...rows].join('\n') + '\n';
   },
 };

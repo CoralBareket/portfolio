@@ -40,8 +40,6 @@ describe('shared schemas', () => {
 
   it('caps event batches at 30 events', () => {
     const events = Array.from({ length: 31 }, () => ({ type: 'pageview' as const, path: '/' }));
-    expect(eventBatchSchema.safeParse({ firstVisitToday: true, isNewVisitor: true, events }).success).toBe(
-      false,
-    );
+    expect(eventBatchSchema.safeParse({ newSession: true, events }).success).toBe(false);
   });
 });

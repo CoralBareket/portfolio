@@ -7,8 +7,6 @@ const { createApp } = await import('../app');
 
 const BROWSER = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/140.0 Safari/537.36';
 const body = JSON.stringify({
-  firstVisitToday: true,
-  isNewVisitor: true,
   newSession: true,
   events: [{ type: 'pageview', path: '/' }],
 });
