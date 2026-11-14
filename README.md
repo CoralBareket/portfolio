@@ -59,6 +59,20 @@ All responses are JSON; errors use one envelope: `{ "error": { "code", "message"
 Admin routes verify a Firebase ID token **and** an `admin` custom claim, granted once with
 `pnpm admin:grant <email>`. Signing in alone grants nothing.
 
+## First-party analytics
+
+No Google Analytics and no third-party trackers: a ~2 KB tracker in the site batches `pageview`,
+`section_view` and `click` events and sends them with `navigator.sendBeacon` to `POST /api/events`.
+
+- **Privacy:** anonymous random ID in `localStorage`, no cookies, no IP addresses, no location.
+  Do-Not-Track / Global Privacy Control, automated browsers and the admin's own visits are skipped.
+- **Free-tier friendly:** the browser computes "first visit today / new visitor / new session", so the
+  server never reads before writing. Each beacon is **one** blind `increment` write into a small
+  `stats_daily/{date}` document; no raw events are stored.
+- **Dashboard** (`/admin`): totals vs the previous period, visits per day, sources and UTM campaigns,
+  section reach, top pages, link clicks, devices/browsers/OS, busiest hours, conversion rates,
+  plain-language insights, and CSV export. A 90-day view reads at most ~180 small documents.
+
 ## Run locally
 
 Requirements: Node 24 (`nvm use`) and pnpm (`corepack enable pnpm`).

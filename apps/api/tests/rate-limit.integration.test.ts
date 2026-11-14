@@ -11,5 +11,5 @@ describe('rateLimitRepository (emulator)', () => {
     const counts = await Promise.all([1, 2, 3].map(() => rateLimitRepository.hit('k', hour, t0)));
     expect(counts.sort()).toEqual([1, 2, 3]);
     expect(await rateLimitRepository.hit('k', hour, t0 + hour)).toBe(1);
-  });
+  }, 20_000); // concurrent transactions on one doc retry under emulator lock contention
 });
