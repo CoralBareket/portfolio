@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import {
+  analyticsRanges,
   cvInputSchema,
   messageUpdateSchema,
   projectInputSchema,
@@ -10,12 +11,14 @@ import {
 import { createUploadSignature } from '../lib/cloudinary';
 import { requireAdmin, type AdminVariables } from '../middleware/require-admin';
 import { validate } from '../middleware/validate';
+import { analyticsService } from '../services/analytics.service';
 import { contentService } from '../services/content.service';
 import { cvService } from '../services/cv.service';
 import { messagesService } from '../services/messages.service';
 import { projectsService } from '../services/projects.service';
 
 const idParam = validate('param', z.object({ id: z.string().min(1).max(128) }));
+const rangeQuery = validate('query', z.object({ range: z.enum(analyticsRanges).default('30d') }));
 
 export const adminRoutes = new Hono<{ Variables: AdminVariables }>()
   .use('*', requireAdmin)
@@ -60,4 +63,15 @@ export const adminRoutes = new Hono<{ Variables: AdminVariables }>()
   .get('/messages', async (c) => c.json(await messagesService.inbox()))
   .patch('/messages/:id', idParam, validate('json', messageUpdateSchema), async (c) =>
     c.json({ message: await messagesService.setStatus(c.req.valid('param').id, c.req.valid('json').status) }),
-  );
+  )
+
+  // Analytics (reads small daily rollup docs only)
+  .get('/analytics', rangeQuery, async (c) =>
+    c.json(await analyticsService.summary(c.req.valid('query').range)),
+  )
+  .get('/analytics.csv', rangeQuery, async (c) => {
+    const { range } = c.req.valid('query');
+    c.header('Content-Type', 'text/csv; charset=utf-8');
+    c.header('Content-Disposition', `attachment; filename="portfolio-analytics-${range}.csv"`);
+    return c.body(await analyticsService.csv(range));
+  });

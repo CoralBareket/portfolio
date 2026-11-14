@@ -38,6 +38,9 @@ const envSchema = z
     RATE_LIMIT_SALT: z.string().default('dev-only-salt'),
     CONTACT_MAX_PER_HOUR: z.coerce.number().int().positive().default(3),
     CONTACT_MAX_PER_DAY: z.coerce.number().int().positive().default(20),
+
+    /** Vercel Cron sends `Authorization: Bearer <CRON_SECRET>` to the daily cleanup job. */
+    CRON_SECRET: optional,
   })
   .superRefine((e, ctx) => {
     if (e.NODE_ENV !== 'production') return;
@@ -47,6 +50,7 @@ const envSchema = z
       'CLOUDINARY_CLOUD_NAME',
       'CLOUDINARY_API_KEY',
       'CLOUDINARY_API_SECRET',
+      'CRON_SECRET',
     ];
     for (const key of required) {
       if (!e[key]) ctx.addIssue({ code: 'custom', path: [key], message: `${key} is required in production` });

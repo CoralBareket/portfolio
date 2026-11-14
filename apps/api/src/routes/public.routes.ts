@@ -1,11 +1,15 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { contactInputSchema } from '@portfolio/shared';
+import { contactInputSchema, eventBatchSchema } from '@portfolio/shared';
+import { AppError } from '../lib/errors';
 import { clientIp } from '../lib/request';
+import { isBot } from '../lib/user-agent';
+import { memoryRateLimit } from '../middleware/memory-rate-limit';
 import { validate } from '../middleware/validate';
 import { contactService } from '../services/contact.service';
 import { contentService } from '../services/content.service';
 import { cvService } from '../services/cv.service';
+import { eventsService } from '../services/events.service';
 import { projectsService } from '../services/projects.service';
 
 /** Cached at Vercel's CDN, so most visits cost zero Firestore reads. */
@@ -33,4 +37,22 @@ export const publicRoutes = new Hono()
   .post('/contact', validate('json', contactInputSchema), async (c) => {
     await contactService.submit(c.req.valid('json'), clientIp(c));
     return c.json({ ok: true }, 201);
+  })
+
+  // Analytics beacon. sendBeacon may send text/plain, so the body is parsed by hand.
+  .post('/events', memoryRateLimit({ max: 30, windowMs: 60_000 }), async (c) => {
+    const ua = c.req.header('user-agent') ?? '';
+    if (c.req.header('dnt') === '1' || isBot(ua)) return c.body(null, 204);
+
+    let raw: unknown;
+    try {
+      raw = JSON.parse(await c.req.text());
+    } catch {
+      throw new AppError(400, 'invalid_json', 'Body must be JSON');
+    }
+    const parsed = eventBatchSchema.safeParse(raw);
+    if (!parsed.success) throw new AppError(400, 'validation_error', 'Invalid event batch');
+
+    await eventsService.ingest(parsed.data, ua, c.req.header('host') ?? '');
+    return c.body(null, 204);
   });

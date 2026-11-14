@@ -5,6 +5,7 @@ import { AppError } from './lib/errors';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { requestLogger } from './middleware/request-logger';
 import { adminRoutes } from './routes/admin.routes';
+import { internalRoutes } from './routes/internal.routes';
 import { publicRoutes } from './routes/public.routes';
 
 /** Builds the API. Runtime-agnostic: used by the local Node server, tests and the Vercel function. */
@@ -23,6 +24,7 @@ export function createApp() {
   );
   app.route('/', publicRoutes);
   app.route('/admin', adminRoutes);
+  app.route('/', internalRoutes);
   app.notFound(notFoundHandler);
   app.onError(errorHandler);
   return app;
