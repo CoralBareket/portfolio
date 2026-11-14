@@ -133,16 +133,57 @@ export const analyticsEventSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('section_view'), section: z.string().max(40) }),
   z.object({ type: z.literal('click'), target: z.enum(clickTargets) }),
 ]);
+/**
+ * The browser computes these one-time flags itself (and sends `true` only once), so the
+ * server counts unique visitors, sessions and new visitors with zero database reads.
+ */
 export const eventBatchSchema = z.object({
-  /** True the first time this browser is seen today (Israel time), so uniques need no DB read. */
+  /** First time this browser is seen today (Israel time) → counts one unique visitor. */
   firstVisitToday: z.boolean(),
+  /** First time this browser is ever seen → counts one new visitor. */
   isNewVisitor: z.boolean(),
+  /** First batch of a browser session → counts one session (with its referrer and device). */
+  newSession: z.boolean(),
   referrer: z.string().max(300).default(''),
   utmSource: z.string().max(60).default(''),
-  events: z.array(analyticsEventSchema).min(1).max(30),
+  events: z.array(analyticsEventSchema).max(30),
 });
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>;
 export type EventBatch = z.infer<typeof eventBatchSchema>;
+
+export const analyticsRanges = ['7d', '30d', '90d', 'all'] as const;
+export type AnalyticsRange = (typeof analyticsRanges)[number];
+
+export type AnalyticsTotals = {
+  pageviews: number;
+  uniques: number;
+  sessions: number;
+  newVisitors: number;
+  cvDownloads: number;
+  contacts: number;
+};
+
+export type AnalyticsSummary = {
+  range: AnalyticsRange;
+  from: string;
+  to: string;
+  totals: AnalyticsTotals;
+  /** Same-length period right before `from`; null for "all". */
+  previous: AnalyticsTotals | null;
+  daily: { date: string; pageviews: number; uniques: number }[];
+  /** Breakdowns, each sorted by count (desc). */
+  pages: [string, number][];
+  referrers: [string, number][];
+  utm: [string, number][];
+  devices: [string, number][];
+  browsers: [string, number][];
+  os: [string, number][];
+  sections: [string, number][];
+  clicks: [string, number][];
+  /** Page views by hour of day (Israel time), index 0–23. */
+  hours: number[];
+  insights: string[];
+};
 
 /** API error envelope used by every endpoint. */
 export type ApiError = { error: { code: string; message: string; details?: unknown } };
