@@ -47,7 +47,7 @@ export function ProjectPage() {
               <title>Project not found · Coral Bareket</title>
               <meta name="robots" content="noindex" />
             </Head>
-            <h1 className="mt-10 text-3xl font-bold">Project not found</h1>
+            <h1 className="mt-10 font-serif text-4xl">Project not found</h1>
           </>
         )}
         {state.status === 'ready' && <ProjectDetail project={state.project} />}
@@ -73,18 +73,20 @@ function ProjectDetail({ project: p }: { project: Project }) {
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      <p className="font-mono text-sm text-accent">// project</p>
-      <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{p.title}</h1>
-      {p.subtitle && <p className="mt-3 text-lg text-accent">{p.subtitle}</p>}
+      <p className="label">
+        <span className="text-accent">Project</span>
+        <span className="mx-2 text-faint">/</span>
+        Case study
+      </p>
+      <h1 className="mt-5 text-[clamp(2.6rem,7vw,5rem)] leading-[0.95] font-medium tracking-[-0.035em]">
+        {p.title}
+      </h1>
+      {p.subtitle && <p className="mt-4 font-serif text-2xl text-muted italic">{p.subtitle}</p>}
       {p.description && <p className="mt-5 text-lg leading-relaxed text-muted">{p.description}</p>}
 
       <div className="mt-6 flex flex-wrap gap-3">
         {p.repoUrl && (
-          <a
-            href={p.repoUrl}
-            data-track="repo"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 font-semibold hover:border-accent hover:text-accent"
-          >
+          <a href={p.repoUrl} data-track="repo" className="link inline-flex items-center gap-2">
             <GithubIcon size={16} /> Source code
           </a>
         )}
@@ -92,7 +94,7 @@ function ProjectDetail({ project: p }: { project: Project }) {
           <a
             href={p.demoUrl}
             data-track="demo"
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 font-semibold text-bg hover:brightness-110"
+            className="inline-flex items-center gap-2 border border-accent px-4 py-2 font-medium text-accent transition-colors hover:bg-accent hover:text-bg"
           >
             <ArrowUpRight size={16} aria-hidden="true" /> Live demo
           </a>
@@ -100,17 +102,13 @@ function ProjectDetail({ project: p }: { project: Project }) {
       </div>
 
       {p.cover && (
-        <img
-          src={p.cover.url}
-          alt={`${p.title} screenshot`}
-          className="mt-10 w-full rounded-xl border border-border"
-        />
+        <img src={p.cover.url} alt={`${p.title} screenshot`} className="mt-12 w-full border border-border" />
       )}
 
       {p.tags.length > 0 && (
         <ul className="mt-8 flex flex-wrap gap-2" aria-label="Technologies">
           {p.tags.map((t) => (
-            <li key={t} className="rounded border border-border px-2 py-0.5 font-mono text-xs text-muted">
+            <li key={t} className="font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
               {t}
             </li>
           ))}
@@ -122,14 +120,14 @@ function ProjectDetail({ project: p }: { project: Project }) {
 
       {p.architecture.length > 0 && (
         <section className="mt-12">
-          <h2 className="mb-5 text-2xl font-bold">Architecture</h2>
+          <h2 className="mb-6 font-serif text-3xl">Architecture</h2>
           <ArchitectureFlow steps={p.architecture} />
         </section>
       )}
 
       {p.keyDecisions.length > 0 && (
         <section className="mt-12">
-          <h2 className="text-2xl font-bold">Key decisions</h2>
+          <h2 className="font-serif text-3xl">Key decisions</h2>
           <ul className="mt-4 space-y-3">
             {p.keyDecisions.map((d) => (
               <li key={d} className="flex gap-3 text-muted">
@@ -149,7 +147,7 @@ function ProjectDetail({ project: p }: { project: Project }) {
 function Block({ title, children }: { title: string; children: string }) {
   return (
     <section className="mt-12">
-      <h2 className="text-2xl font-bold">{title}</h2>
+      <h2 className="font-serif text-3xl">{title}</h2>
       <p className="mt-4 leading-relaxed whitespace-pre-line text-muted">{children}</p>
     </section>
   );

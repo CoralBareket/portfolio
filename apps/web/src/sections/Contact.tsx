@@ -1,17 +1,16 @@
-import { Mail, Send } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
 import { contactInputSchema } from '@portfolio/shared';
-import { Reveal } from '../components/Reveal';
 import { Turnstile, type TurnstileHandle } from '../components/Turnstile';
-import { GithubIcon, LinkedinIcon } from '../components/icons';
 import { useContent } from '../lib/content';
 
 const fieldsSchema = contactInputSchema.pick({ name: true, email: true, message: true });
 type Field = 'name' | 'email' | 'message';
 type Status = 'idle' | 'sending' | 'sent' | 'error' | 'captcha' | 'limited';
 
+/** Underline-only fields, like filling in a form on a printed sheet. */
 const inputClass =
-  'mt-1.5 w-full rounded-lg border border-border bg-bg px-3.5 py-2.5 text-text placeholder:text-muted/70 focus:border-accent focus:outline-none';
+  'mt-2 w-full border-0 border-b border-rule bg-transparent px-0 py-2 text-[17px] text-text transition-colors placeholder:text-faint focus:border-accent focus:outline-none focus-visible:outline-none';
 
 export function Contact() {
   const { content } = useContent();
@@ -67,135 +66,150 @@ export function Contact() {
     }
   }
 
-  const contactLinks = [
-    { href: links.linkedin, label: 'LinkedIn', icon: <LinkedinIcon size={18} />, text: 'coral-bareket' },
-    {
-      href: `mailto:${links.email}`,
-      label: 'Email',
-      icon: <Mail size={18} aria-hidden="true" />,
-      text: links.email,
-    },
-    { href: links.github, label: 'GitHub', icon: <GithubIcon size={18} />, text: 'CoralBareket' },
+  const elsewhere = [
+    { href: links.linkedin, label: 'LinkedIn', text: 'in/coral-bareket' },
+    { href: links.github, label: 'GitHub', text: 'github.com/CoralBareket' },
   ];
 
-  return (
-    <div className="grid gap-10 lg:grid-cols-[1fr_1.3fr]">
-      <Reveal>
-        <p className="text-lg leading-relaxed text-muted">
-          Have a role, a project or a question? Send me a message or reach out directly.
+  const field = (name: Field, label: string, input: React.ReactNode) => (
+    <div>
+      <label htmlFor={`contact-${name}`} className="label">
+        {label}
+      </label>
+      {input}
+      {errors[name] && (
+        <p id={`contact-${name}-error`} className="mt-2 text-sm text-red-300">
+          {errors[name]}
         </p>
-        <ul className="mt-8 space-y-3">
-          {contactLinks.map((l) => (
-            <li key={l.label}>
-              <a
-                href={l.href}
-                {...(l.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                className="group flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-accent/50"
-              >
-                <span className="grid size-10 place-items-center rounded-lg bg-accent-soft text-accent">
-                  {l.icon}
-                </span>
-                <span>
-                  <span className="block font-mono text-xs text-muted">{l.label}</span>
-                  <span className="break-all group-hover:text-accent">{l.text}</span>
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </Reveal>
+      )}
+    </div>
+  );
+  const aria = (name: Field) => ({
+    'aria-invalid': errors[name] ? true : undefined,
+    'aria-describedby': errors[name] ? `contact-${name}-error` : undefined,
+  });
 
-      <Reveal delay={0.1}>
-        <form
-          noValidate
-          onSubmit={onSubmit}
-          className="rounded-xl border border-border bg-surface p-6 sm:p-8"
-          aria-describedby="contact-status"
+  return (
+    <div className="grid grid-cols-1 gap-14 lg:grid-cols-[1fr_1.15fr] lg:gap-12">
+      <div>
+        <p className="max-w-[28ch] font-serif text-[1.9rem] leading-[1.18] sm:text-[2.3rem]">
+          Have a role, a project or a question? I&apos;d like to hear about it.
+        </p>
+        <a
+          href={`mailto:${links.email}`}
+          aria-label={`Email ${links.email}`}
+          className="group mt-8 inline-flex items-center gap-2 text-lg break-all sm:text-xl"
         >
-          <div className="grid gap-5 sm:grid-cols-2">
-            {(['name', 'email'] as const).map((field) => (
-              <div key={field}>
-                <label htmlFor={`contact-${field}`} className="font-mono text-sm">
-                  {field === 'name' ? 'Name' : 'Email'}
-                </label>
-                <input
-                  id={`contact-${field}`}
-                  name={field}
-                  type={field === 'email' ? 'email' : 'text'}
-                  autoComplete={field}
-                  required
-                  aria-invalid={errors[field] ? true : undefined}
-                  aria-describedby={errors[field] ? `contact-${field}-error` : undefined}
-                  className={inputClass}
-                />
-                {errors[field] && (
-                  <p id={`contact-${field}-error`} className="mt-1.5 text-sm text-red-300">
-                    {errors[field]}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
+          <span className="link">{links.email}</span>
+          <ArrowUpRight
+            size={18}
+            aria-hidden="true"
+            className="text-accent transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+          />
+        </a>
+        <dl className="mt-10 border-b border-border">
+          {elsewhere.map((l) => (
+            <div key={l.label} className="grid grid-cols-[110px_1fr] border-t border-border py-4">
+              <dt className="label pt-[3px]">{l.label}</dt>
+              <dd>
+                <a
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${l.label}: ${l.text}`}
+                  className="link"
+                >
+                  {l.text}
+                </a>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
 
-          <div className="mt-5">
-            <label htmlFor="contact-message" className="font-mono text-sm">
-              Message
-            </label>
-            <textarea
-              id="contact-message"
-              name="message"
-              rows={5}
+      <form noValidate onSubmit={onSubmit} aria-describedby="contact-status" className="relative space-y-8">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+          {field(
+            'name',
+            'Name',
+            <input
+              id="contact-name"
+              name="name"
+              type="text"
+              autoComplete="name"
               required
-              aria-invalid={errors.message ? true : undefined}
-              aria-describedby={errors.message ? 'contact-message-error' : undefined}
-              className={`${inputClass} resize-y`}
+              className={inputClass}
+              {...aria('name')}
+            />,
+          )}
+          {field(
+            'email',
+            'Email',
+            <input
+              id="contact-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              className={inputClass}
+              {...aria('email')}
+            />,
+          )}
+        </div>
+        {field(
+          'message',
+          'Message',
+          <textarea
+            id="contact-message"
+            name="message"
+            rows={5}
+            required
+            className={`${inputClass} resize-y`}
+            {...aria('message')}
+          />,
+        )}
+
+        {/* Honeypot: hidden from people and screen readers, irresistible to bots. */}
+        <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+          <label htmlFor="contact-website">Website</label>
+          <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+        </div>
+
+        <Turnstile ref={captcha} onToken={setCaptchaToken} />
+
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <button
+            type="submit"
+            disabled={status === 'sending'}
+            className="group inline-flex items-center gap-2 border border-accent px-5 py-2.5 font-medium text-accent transition-colors hover:bg-accent hover:text-bg disabled:opacity-60"
+          >
+            {status === 'sending' ? 'Sending…' : 'Send message'}
+            <ArrowRight
+              size={17}
+              aria-hidden="true"
+              className="transition-transform group-hover:translate-x-0.5"
             />
-            {errors.message && (
-              <p id="contact-message-error" className="mt-1.5 text-sm text-red-300">
-                {errors.message}
-              </p>
+          </button>
+          <p id="contact-status" role="status" className="text-sm">
+            {status === 'sent' && (
+              <span className="text-accent">Thanks! I&apos;ll get back to you soon.</span>
             )}
-          </div>
-
-          {/* Honeypot: hidden from people and screen readers, irresistible to bots. */}
-          <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
-            <label htmlFor="contact-website">Website</label>
-            <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
-          </div>
-
-          <div className="mt-5">
-            <Turnstile ref={captcha} onToken={setCaptchaToken} />
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-4">
-            <button
-              type="submit"
-              disabled={status === 'sending'}
-              className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 font-semibold text-bg transition hover:brightness-110 disabled:opacity-60"
-            >
-              <Send size={18} aria-hidden="true" /> {status === 'sending' ? 'Sending…' : 'Send message'}
-            </button>
-            <p id="contact-status" role="status" className="text-sm">
-              {status === 'sent' && (
-                <span className="text-accent">Thanks! I&apos;ll get back to you soon.</span>
-              )}
-              {status === 'captcha' && (
-                <span className="text-red-300">Please complete the quick check above first.</span>
-              )}
-              {status === 'limited' && (
-                <span className="text-red-300">
-                  Too many messages for now. Please email me at {links.email}.
-                </span>
-              )}
-              {status === 'error' && (
-                <span className="text-red-300">
-                  Couldn&apos;t send right now. Please email me at {links.email}.
-                </span>
-              )}
-            </p>
-          </div>
-        </form>
-      </Reveal>
+            {status === 'captcha' && (
+              <span className="text-red-300">Please complete the quick check above first.</span>
+            )}
+            {status === 'limited' && (
+              <span className="text-red-300">
+                Too many messages for now. Please email me at {links.email}.
+              </span>
+            )}
+            {status === 'error' && (
+              <span className="text-red-300">
+                Couldn&apos;t send right now. Please email me at {links.email}.
+              </span>
+            )}
+          </p>
+        </div>
+      </form>
     </div>
   );
 }

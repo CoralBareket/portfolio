@@ -1,36 +1,26 @@
-import { Cloud, Database, Layers, Server, type LucideIcon } from 'lucide-react';
-import { Reveal } from '../components/Reveal';
 import { useContent } from '../lib/content';
-
-const icons: LucideIcon[] = [Server, Database, Cloud, Layers];
 
 export function Focus() {
   const { content } = useContent();
   return (
-    <div className="grid gap-5 md:grid-cols-2">
-      {content.focusAreas.map((area, i) => {
-        const Icon = icons[i % icons.length] ?? Layers;
-        return (
-          <Reveal key={area.title} delay={i * 0.06}>
-            <article className="group h-full rounded-xl border border-border bg-surface p-6 transition-colors hover:border-accent/50">
-              <div className="flex items-center gap-3">
-                <span className="grid size-10 place-items-center rounded-lg bg-accent-soft text-accent">
-                  <Icon size={20} aria-hidden="true" />
-                </span>
-                <h3 className="text-lg font-semibold">{area.title}</h3>
-              </div>
-              <p className="mt-4 leading-relaxed text-muted">{area.description}</p>
-              <ul className="mt-5 flex flex-wrap gap-2" aria-label={`${area.title} technologies`}>
-                {area.tags.map((tag) => (
-                  <li key={tag} className="font-mono text-xs text-accent/90">
-                    #{tag}
-                  </li>
-                ))}
-              </ul>
-            </article>
-          </Reveal>
-        );
-      })}
+    <div className="grid grid-cols-1 gap-x-10 sm:grid-cols-2">
+      {content.focusAreas.map((area, i) => (
+        <article key={area.title} className="group border-t border-border py-7">
+          <p className="font-mono text-[11px] tracking-[0.14em] text-faint transition-colors group-hover:text-accent">
+            {String.fromCharCode(65 + i)}.
+          </p>
+          <h3 className="mt-3 text-xl font-medium tracking-tight">{area.title}</h3>
+          <p className="mt-3 max-w-[46ch] leading-relaxed text-muted">{area.description}</p>
+          <p className="mt-5 font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
+            {area.tags.map((tag, j) => (
+              <span key={tag}>
+                {j > 0 && <span className="text-faint"> · </span>}
+                {tag}
+              </span>
+            ))}
+          </p>
+        </article>
+      ))}
     </div>
   );
 }

@@ -1,66 +1,54 @@
 import { ArrowUpRight } from 'lucide-react';
 import type { Project } from '@portfolio/shared';
-import { Reveal } from '../components/Reveal';
-import { GithubIcon } from '../components/icons';
 import { useContent } from '../lib/content';
 
 function ComingSoon() {
   return (
-    <Reveal>
-      <div className="max-w-2xl rounded-xl border border-dashed border-border bg-surface/60 p-6 font-mono text-sm sm:p-8">
-        <p className="text-muted">
-          <span className="text-accent">$</span> ls ./projects
-        </p>
-        <p className="mt-3 text-text">Projects coming soon. I&apos;m currently building.</p>
-        <p className="mt-3 text-muted">
-          <span className="text-accent">$</span>
-          <span className="ml-1 animate-blink">▍</span>
-        </p>
-      </div>
-    </Reveal>
+    <div className="border border-dashed border-rule p-6 sm:p-10">
+      <p className="label">Status</p>
+      <p className="mt-4 font-serif text-3xl leading-tight sm:text-4xl">Projects coming soon.</p>
+      <p className="mt-3 text-muted">
+        I&apos;m currently building
+        <span aria-hidden="true" className="ml-1 animate-blink text-accent">
+          ▍
+        </span>
+      </p>
+    </div>
   );
 }
 
-function ProjectCard({ project }: { project: Project }) {
+/** One project as a row in the index: number, title, tags, and a link to its write-up. */
+function ProjectRow({ project, index }: { project: Project; index: number }) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors hover:border-accent/50">
-      {project.cover && (
-        <img
-          src={project.cover.url}
-          alt=""
-          loading="lazy"
-          className="aspect-video w-full border-b border-border object-cover"
-        />
-      )}
-      <div className="flex flex-1 flex-col p-6">
-        <h3 className="text-lg font-semibold">
-          <a href={`/projects/${project.slug}`} className="hover:text-accent">
+    <li className="border-t border-border">
+      <a
+        href={`/projects/${project.slug}`}
+        className="group grid grid-cols-1 gap-4 py-7 sm:grid-cols-[2.5rem_1fr_auto] sm:items-start sm:gap-6"
+      >
+        <span className="font-mono text-[11px] text-faint">P.{String(index + 1).padStart(2, '0')}</span>
+        <span>
+          <span className="block text-2xl font-medium tracking-tight transition-colors group-hover:text-accent">
             {project.title}
-          </a>
-        </h3>
-        {project.subtitle && <p className="mt-1 text-sm text-accent">{project.subtitle}</p>}
-        <p className="mt-3 flex-1 text-muted">{project.description}</p>
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {project.tags.map((t) => (
-            <li key={t} className="rounded border border-border px-2 py-0.5 font-mono text-xs text-muted">
-              {t}
-            </li>
-          ))}
-        </ul>
-        <div className="mt-5 flex gap-4 text-sm">
-          {project.repoUrl && (
-            <a href={project.repoUrl} className="inline-flex items-center gap-1.5 hover:text-accent">
-              <GithubIcon size={15} /> Code
-            </a>
+          </span>
+          {project.subtitle && (
+            <span className="mt-1 block font-serif text-xl text-muted italic">{project.subtitle}</span>
           )}
-          {project.demoUrl && (
-            <a href={project.demoUrl} className="inline-flex items-center gap-1.5 hover:text-accent">
-              <ArrowUpRight size={15} aria-hidden="true" /> Live demo
-            </a>
+          {project.description && (
+            <span className="mt-3 block max-w-[60ch] leading-relaxed text-muted">{project.description}</span>
           )}
-        </div>
-      </div>
-    </article>
+          {project.tags.length > 0 && (
+            <span className="mt-4 block font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
+              {project.tags.join(' · ')}
+            </span>
+          )}
+        </span>
+        <ArrowUpRight
+          size={22}
+          aria-hidden="true"
+          className="hidden text-faint transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-accent sm:block"
+        />
+      </a>
+    </li>
   );
 }
 
@@ -69,12 +57,10 @@ export function Projects() {
   const published = projects.filter((p) => p.published).sort((a, b) => a.order - b.order);
   if (published.length === 0) return <ComingSoon />;
   return (
-    <div className="grid gap-5 md:grid-cols-2">
+    <ol className="border-b border-border">
       {published.map((p, i) => (
-        <Reveal key={p.id} delay={i * 0.05}>
-          <ProjectCard project={p} />
-        </Reveal>
+        <ProjectRow key={p.id} project={p} index={i} />
       ))}
-    </div>
+    </ol>
   );
 }

@@ -1,31 +1,30 @@
-import { Reveal } from '../components/Reveal';
-import { TechIcon } from '../components/icons';
 import { useContent } from '../lib/content';
 
+/** A spec table: one row per group, items set like a parts list. */
 export function TechStack() {
   const { content } = useContent();
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {content.skills.map((group, i) => (
-        <Reveal key={group.name} delay={i * 0.05}>
-          <div className="h-full rounded-xl border border-border bg-surface p-5 transition-colors hover:border-accent/50">
-            <h3 className="font-mono text-sm font-semibold text-accent">{group.name}</h3>
-            <ul className="mt-4 flex flex-wrap gap-2">
-              {group.items.map((item) => (
-                <li
-                  key={item}
-                  className="group inline-flex items-center gap-2 rounded-md border border-border bg-bg px-2.5 py-1.5 text-sm"
-                >
-                  <span className="text-muted transition-colors group-hover:text-accent">
-                    <TechIcon name={item} />
+    <dl className="border-b border-border">
+      {content.skills.map((group) => (
+        <div
+          key={group.name}
+          className="group grid grid-cols-1 gap-2 border-t border-border py-5 transition-colors sm:grid-cols-[170px_1fr] sm:gap-6"
+        >
+          <dt className="label pt-[5px] transition-colors group-hover:text-accent">{group.name}</dt>
+          <dd className="text-[17px] leading-relaxed sm:text-lg">
+            {group.items.map((item, i) => (
+              <span key={item}>
+                {i > 0 && (
+                  <span aria-hidden="true" className="mx-1 text-faint">
+                    {' / '}
                   </span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Reveal>
+                )}
+                <span className="whitespace-nowrap">{item}</span>
+              </span>
+            ))}
+          </dd>
+        </div>
       ))}
-    </div>
+    </dl>
   );
 }

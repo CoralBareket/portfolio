@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 
-/** Fades content up once as it scrolls into view. Disabled by MotionConfig for reduced motion. */
+/** Content settles into place once as it scrolls into view. Off for reduced motion (MotionConfig). */
 export function Reveal({
   children,
   delay = 0,
@@ -14,12 +14,26 @@ export function Reveal({
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '0px 0px -80px 0px' }}
-      transition={{ duration: 0.5, delay, ease: 'easeOut' }}
+      viewport={{ once: true, margin: '0px 0px -60px 0px' }}
+      transition={{ duration: 0.6, delay, ease: [0.2, 0.7, 0.2, 1] }}
     >
       {children}
     </motion.div>
+  );
+}
+
+/** A hairline that draws itself from left to right when it enters the viewport. */
+export function Rule({ className = '' }: { className?: string }) {
+  return (
+    <motion.div
+      aria-hidden="true"
+      className={`rule ${className}`}
+      initial={{ scaleX: 0 }}
+      whileInView={{ scaleX: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 1.1, ease: [0.2, 0.7, 0.2, 1] }}
+    />
   );
 }

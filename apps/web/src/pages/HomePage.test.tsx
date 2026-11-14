@@ -22,7 +22,7 @@ describe('HomePage', () => {
   it('numbers every section in the nav and links to it', () => {
     renderHome();
     const nav = screen.getByRole('navigation', { name: 'Main' });
-    const links = within(nav).getAllByRole('link').slice(1); // skip the logo
+    const links = within(nav).getAllByRole('link').slice(1); // skip the name link
     expect(links.map((l) => l.getAttribute('href'))).toEqual([
       '#stack',
       '#focus',
@@ -31,7 +31,7 @@ describe('HomePage', () => {
       '#about',
       '#contact',
     ]);
-    expect(links[0]).toHaveTextContent('01.');
+    expect(links[0]).toHaveTextContent('01');
   });
 
   it('shows the "coming soon" state when there are no projects', () => {

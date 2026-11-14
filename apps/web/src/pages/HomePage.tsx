@@ -15,8 +15,8 @@ import { Projects } from '../sections/Projects';
 import { TechStack } from '../sections/TechStack';
 
 const sectionMeta: Record<SectionId, { title: string; intro?: string; Body: () => React.JSX.Element }> = {
-  stack: { title: 'Tech Stack', intro: 'The languages, frameworks and tools I work with.', Body: TechStack },
-  focus: { title: 'Engineering Focus', intro: 'Where I spend most of my engineering time.', Body: Focus },
+  stack: { title: 'Tech stack', intro: 'Languages, frameworks and tools I work with.', Body: TechStack },
+  focus: { title: 'Engineering focus', intro: 'Where most of my engineering time goes.', Body: Focus },
   experience: { title: 'Experience', Body: Experience },
   projects: { title: 'Projects', Body: Projects },
   about: { title: 'About', Body: About },
@@ -35,23 +35,23 @@ function Home() {
       <Seo content={content} />
       <a
         href="#main"
-        className="sr-only z-50 rounded-md bg-accent px-4 py-2 font-semibold text-bg focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        className="sr-only z-50 bg-accent px-4 py-2 font-medium text-bg focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
         Skip to content
       </a>
-      <Nav sections={sections} />
+      <Nav name={content.hero.name} title={content.hero.title} sections={sections} />
       <main id="main">
         <Hero workHref={workHref} />
         {sections.map((s) => {
           const { title, intro, Body } = sectionMeta[s.id];
           return (
-            <Section key={s.id} id={s.id} number={s.number} slug={s.slug} title={title} intro={intro}>
+            <Section key={s.id} id={s.id} number={s.number} label={s.label} title={title} intro={intro}>
               <Body />
             </Section>
           );
         })}
       </main>
-      <Footer name={content.hero.name} />
+      <Footer name={content.hero.name} location={content.hero.location} />
     </MotionConfig>
   );
 }
