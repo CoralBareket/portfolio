@@ -7,11 +7,13 @@ import type { Project } from '@portfolio/shared';
 import { ArchitectureFlow } from '../components/ArchitectureFlow';
 import { GithubIcon } from '../components/icons';
 import { SITE_URL } from '../lib/site';
+import { usePageTracking } from '../lib/usePageTracking';
 
 type State = { status: 'loading' } | { status: 'missing' } | { status: 'ready'; project: Project };
 
 /** Pre-rendered per published project at build time; fetched client-side for newer ones. */
 export function ProjectPage({ initial }: { initial?: Project }) {
+  usePageTracking();
   const { slug = '' } = useParams();
   const [state, setState] = useState<State>(
     initial ? { status: 'ready', project: initial } : { status: 'loading' },

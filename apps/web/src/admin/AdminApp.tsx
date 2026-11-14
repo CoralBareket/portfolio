@@ -1,7 +1,9 @@
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
-import { FileText, FolderKanban, Inbox as InboxIcon, LogOut, PenSquare } from 'lucide-react';
+import { BarChart3, FileText, FolderKanban, Inbox as InboxIcon, LogOut, PenSquare } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { ANALYTICS_EXCLUDE_KEY } from '../lib/site';
+import { adminFetch } from './api';
+import { Analytics } from './Analytics';
 import { ContentAdmin } from './ContentAdmin';
 import { CvAdmin } from './CvAdmin';
 import { getAdminAuth } from './firebase';
@@ -11,7 +13,7 @@ import { Button, Card, Notice } from './ui';
 
 type Session =
   { state: 'loading' } | { state: 'signed-out' } | { state: 'ready'; user: User; isAdmin: boolean };
-type Tab = 'inbox' | 'projects' | 'content' | 'cv';
+type Tab = 'analytics' | 'inbox' | 'projects' | 'content' | 'cv';
 
 export default function AdminApp() {
   const auth = useMemo(() => getAdminAuth(), []);
@@ -91,10 +93,18 @@ export default function AdminApp() {
 }
 
 function Dashboard({ user, onSignOut }: { user: User; onSignOut: () => void }) {
-  const [tab, setTab] = useState<Tab>('inbox');
+  const [tab, setTab] = useState<Tab>('analytics');
   const [unread, setUnread] = useState(0);
 
+  // Unread badge is visible from every tab, so load it once on open.
+  useEffect(() => {
+    adminFetch<{ unread: number }>(user, '/messages')
+      .then((d) => setUnread(d.unread))
+      .catch(() => undefined);
+  }, [user]);
+
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={16} aria-hidden="true" /> },
     { id: 'inbox', label: 'Inbox', icon: <InboxIcon size={16} aria-hidden="true" /> },
     { id: 'projects', label: 'Projects', icon: <FolderKanban size={16} aria-hidden="true" /> },
     { id: 'content', label: 'Content', icon: <PenSquare size={16} aria-hidden="true" /> },
@@ -140,6 +150,7 @@ function Dashboard({ user, onSignOut }: { user: User; onSignOut: () => void }) {
       </nav>
 
       <main className="mt-6">
+        {tab === 'analytics' && <Analytics user={user} />}
         {tab === 'inbox' && <Inbox user={user} onUnreadChange={setUnread} />}
         {tab === 'projects' && <ProjectsAdmin user={user} />}
         {tab === 'content' && <ContentAdmin user={user} />}

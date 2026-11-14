@@ -4,6 +4,7 @@ import { Nav } from '../components/Nav';
 import { Section } from '../components/Section';
 import { Seo } from '../components/Seo';
 import { ContentProvider, useContent } from '../lib/content';
+import { usePageTracking } from '../lib/usePageTracking';
 import { visibleSections, type SectionId } from '../lib/site';
 import { About } from '../sections/About';
 import { Contact } from '../sections/Contact';
@@ -23,6 +24,7 @@ const sectionMeta: Record<SectionId, { title: string; intro?: string; Body: () =
 };
 
 function Home() {
+  usePageTracking({ sections: true });
   const { content, projects } = useContent();
   const sections = visibleSections(content.settings.hideProjects);
   const hasProjects = projects.some((p) => p.published);

@@ -1,11 +1,17 @@
 import { render, screen, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { HomePage } from './HomePage';
 
 // <Head> is rendered by vite-react-ssg at build time; it has no visible output to test here.
 vi.mock('vite-react-ssg', () => ({ Head: () => null }));
 
-const renderHome = () => render(<HomePage />);
+const renderHome = () =>
+  render(
+    <MemoryRouter>
+      <HomePage />
+    </MemoryRouter>,
+  );
 
 describe('HomePage', () => {
   it('shows the name as the only h1', () => {
