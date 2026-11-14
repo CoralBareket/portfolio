@@ -90,4 +90,32 @@ security-rules and integration tests run against the Firebase emulators inside t
 
 ## Deployment
 
-Production deploys happen only through the manually triggered **Deploy** GitHub Actions workflow on `main`. _(Details coming in phase 6.)_
+```mermaid
+flowchart LR
+  dev[dev branch] -->|pull request| main[main branch]
+  main -->|Actions → "Deploy to production" → Run workflow| ci[lint · typecheck · unit · emulator tests · build]
+  ci -->|all green| fs[firebase deploy: rules + indexes]
+  fs --> vc[vercel deploy --prebuilt --prod]
+  vc --> smoke[smoke test coralbareket.vercel.app]
+```
+
+- **Only one path to production:** the manually started `Deploy to production` workflow on `main`.
+  The Vercel project is not connected to Git at all, so pushes and merges never deploy anything, and there are
+  no preview deployments.
+- **Build Output API:** `pnpm build:vercel` produces `.vercel/output` itself: pre-rendered pages (built from a
+  fresh Firestore snapshot, so SEO and link previews show current content), the API bundled into one Node.js
+  function in `fra1` (Frankfurt, next to Firestore `europe-west3`), routing, a strict CSP with hashed inline
+  scripts, clean URLs and the daily cleanup cron.
+- **Secrets** live only in Vercel env vars (runtime) and GitHub Actions secrets (build). `pnpm setup:production`
+  pushes them to Vercel from a git-ignored `.env.production.local` (template: `.env.production.example`).
+
+### Free-tier budget
+
+| Service           | Free allowance                                  | This site                                                     |
+| ----------------- | ----------------------------------------------- | ------------------------------------------------------------- |
+| Firestore (Spark) | 50K reads, 20K writes, 20K deletes / day, 1 GiB | ~3 writes per visit; public content served from the CDN cache |
+| Vercel Hobby      | 1M function invocations, 4 h active CPU / month | a few invocations per visit; static pages from the CDN        |
+| Resend            | 100 emails / day                                | contact form capped at 20 / day                               |
+| Cloudinary        | 25 credits / month                              | a CV and a few project images                                 |
+
+Hitting a free limit pauses that service until it resets; nothing is ever billed (no card on file).
