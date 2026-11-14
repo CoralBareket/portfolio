@@ -1,6 +1,5 @@
 import type { EventBatch } from '@portfolio/shared';
-import { classifyReferrer, normalizeUtm } from '../lib/referrer';
-import { parseUserAgent } from '../lib/user-agent';
+import { classifyReferrer } from '../lib/referrer';
 import { statsRepository, type StatIncrements } from '../repositories/stats.repository';
 
 /** Only known site sections are counted, so arbitrary strings can't bloat the stats doc. */
@@ -27,12 +26,7 @@ const bump = (map: Record<string, number>, key: string, by = 1) => {
  * Turns one tracker batch into the counter increments for today's stats doc.
  * Pure function: no I/O, fully unit-tested.
  */
-export function buildIncrements(
-  batch: EventBatch,
-  ua: string,
-  ownHost: string,
-  now = new Date(),
-): StatIncrements {
+export function buildIncrements(batch: EventBatch, ownHost: string, now = new Date()): StatIncrements {
   const pages: Record<string, number> = {};
   const sections: Record<string, number> = {};
   const clicks: Record<string, number> = {};
@@ -60,23 +54,17 @@ export function buildIncrements(
   if (batch.firstVisitToday) inc.uniques = 1;
   if (batch.isNewVisitor) inc.newVisitors = 1;
 
-  // Source and device are counted once per session, not per event.
+  // The traffic source is counted once per session, not per event.
   if (batch.newSession) {
-    const client = parseUserAgent(ua);
     inc.sessions = 1;
     inc.referrers = { [classifyReferrer(batch.referrer, ownHost)]: 1 };
-    const utm = normalizeUtm(batch.utmSource);
-    if (utm) inc.utm = { [utm]: 1 };
-    inc.devices = { [client.device]: 1 };
-    inc.browsers = { [client.browser]: 1 };
-    inc.os = { [client.os]: 1 };
   }
   return inc;
 }
 
 export const eventsService = {
-  async ingest(batch: EventBatch, ua: string, ownHost: string): Promise<void> {
-    const increments = buildIncrements(batch, ua, ownHost);
+  async ingest(batch: EventBatch, ownHost: string): Promise<void> {
+    const increments = buildIncrements(batch, ownHost);
     if (Object.keys(increments).length === 0) return;
     await statsRepository.increment(increments);
   },

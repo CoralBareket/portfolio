@@ -27,7 +27,6 @@ describe('summarize', () => {
       cvDownloads: 2,
       contacts: 1,
       referrers: { LinkedIn: 8, Direct: 4 },
-      devices: { mobile: 9, desktop: 3 },
       sections: { stack: 12, focus: 11, experience: 5, about: 3, contact: 2 },
       hours: { '14': 20, '09': 10 },
       pages: { '/': 30 },
@@ -65,7 +64,6 @@ describe('summarize', () => {
         'Most visitors leave before the Experience section.',
         '13% of visitors downloaded the CV and 7% sent a message.',
         'Busiest hour: 14:00–15:00 (Israel time).',
-        '50% of sessions were on a phone.',
       ]),
     );
   });

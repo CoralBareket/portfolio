@@ -22,11 +22,3 @@ export function classifyReferrer(referrer: string, ownHost?: string): string {
   for (const [pattern, name] of KNOWN) if (pattern.test(host)) return name;
   return host.slice(0, 60);
 }
-
-/** Normalizes utm_source values ("LinkedIn", "linkedin ") to one bucket name. */
-export const normalizeUtm = (source: string) =>
-  source
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]/g, '')
-    .slice(0, 40);

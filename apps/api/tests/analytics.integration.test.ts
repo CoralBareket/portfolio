@@ -29,7 +29,6 @@ describe('analytics pipeline (emulator)', () => {
         isNewVisitor: true,
         newSession: true,
         referrer: 'https://www.linkedin.com/',
-        utmSource: 'linkedin',
         events: [{ type: 'pageview', path: '/' }],
       },
       '10.1.0.1',
@@ -70,8 +69,6 @@ describe('analytics pipeline (emulator)', () => {
         ['Direct', 1],
       ]),
     );
-    expect(s.utm).toEqual([['linkedin', 1]]);
-    expect(s.devices).toEqual([['mobile', 2]]);
     expect(s.clicks).toEqual([['github', 1]]);
     expect(s.daily).toHaveLength(7);
     expect(s.daily.at(-1)?.pageviews).toBe(2);

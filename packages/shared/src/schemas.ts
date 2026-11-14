@@ -145,7 +145,6 @@ export const eventBatchSchema = z.object({
   /** First batch of a browser session → counts one session (with its referrer and device). */
   newSession: z.boolean(),
   referrer: z.string().max(300).default(''),
-  utmSource: z.string().max(60).default(''),
   events: z.array(analyticsEventSchema).max(30),
 });
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>;
@@ -174,10 +173,6 @@ export type AnalyticsSummary = {
   /** Breakdowns, each sorted by count (desc). */
   pages: [string, number][];
   referrers: [string, number][];
-  utm: [string, number][];
-  devices: [string, number][];
-  browsers: [string, number][];
-  os: [string, number][];
   sections: [string, number][];
   clicks: [string, number][];
   /** Page views by hour of day (Israel time), index 0–23. */

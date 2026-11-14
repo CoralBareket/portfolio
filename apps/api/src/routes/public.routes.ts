@@ -53,6 +53,6 @@ export const publicRoutes = new Hono()
     const parsed = eventBatchSchema.safeParse(raw);
     if (!parsed.success) throw new AppError(400, 'validation_error', 'Invalid event batch');
 
-    await eventsService.ingest(parsed.data, ua, c.req.header('host') ?? '');
+    await eventsService.ingest(parsed.data, c.req.header('host') ?? '');
     return c.body(null, 204);
   });

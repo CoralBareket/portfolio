@@ -14,7 +14,7 @@ const SECTION_NAMES: Record<string, string> = {
   contact: 'Contact',
 };
 const TOTAL_KEYS = ['pageviews', 'uniques', 'sessions', 'newVisitors', 'cvDownloads', 'contacts'] as const;
-const MAP_KEYS = ['pages', 'referrers', 'utm', 'devices', 'browsers', 'os', 'sections', 'clicks'] as const;
+const MAP_KEYS = ['pages', 'referrers', 'sections', 'clicks'] as const;
 
 /** YYYY-MM-DD arithmetic on calendar days (UTC-based, so no DST surprises). */
 export const addDays = (day: string, n: number) =>
@@ -83,9 +83,6 @@ export function buildInsights(s: Omit<AnalyticsSummary, 'insights'>, periodLabel
     const hh = String(peak).padStart(2, '0');
     out.push(`Busiest hour: ${hh}:00–${String((peak + 1) % 24).padStart(2, '0')}:00 (Israel time).`);
   }
-
-  const mobile = s.devices.find(([d]) => d === 'mobile')?.[1] ?? 0;
-  if (totals.sessions > 0) out.push(`${pct(mobile, totals.sessions)}% of sessions were on a phone.`);
 
   return out.slice(0, 6);
 }

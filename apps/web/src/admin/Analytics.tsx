@@ -39,9 +39,6 @@ const SECTION_LABELS: Record<string, string> = {
 };
 const SECTION_ORDER = Object.keys(SECTION_LABELS);
 const NICE_NAMES: Record<string, string> = {
-  mobile: 'Phone',
-  desktop: 'Desktop',
-  tablet: 'Tablet',
   linkedin: 'LinkedIn',
   github: 'GitHub',
   email: 'Email',
@@ -171,14 +168,6 @@ function Dashboard({ data }: { data: AnalyticsSummary }) {
         <Card title="Sources">
           <BarList rows={data.referrers} total={totals.sessions} unit="sessions" />
         </Card>
-        <Card title="UTM campaigns">
-          <BarList
-            rows={data.utm}
-            total={totals.sessions}
-            unit="sessions"
-            empty="No utm_source links used yet."
-          />
-        </Card>
         <Card title="Section reach">
           <BarList rows={sectionReach} total={totals.sessions} unit="sessions" keepOrder />
         </Card>
@@ -187,15 +176,6 @@ function Dashboard({ data }: { data: AnalyticsSummary }) {
         </Card>
         <Card title="Link clicks">
           <BarList rows={nice(data.clicks)} unit="clicks" empty="No tracked link clicks yet." />
-        </Card>
-        <Card title="Devices">
-          <BarList rows={nice(data.devices)} total={totals.sessions} unit="sessions" />
-        </Card>
-        <Card title="Browsers">
-          <BarList rows={data.browsers} total={totals.sessions} unit="sessions" />
-        </Card>
-        <Card title="Operating systems">
-          <BarList rows={data.os} total={totals.sessions} unit="sessions" />
         </Card>
         <Card title="Busiest hours (Israel time)">
           <HoursChart hours={data.hours} />

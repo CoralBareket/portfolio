@@ -15,7 +15,7 @@ const FLUSH_MS = 15_000;
 const KEYS = { visitor: 'cb_vid', lastDay: 'cb_day', session: 'cb_sid', sections: 'cb_sec' } as const;
 
 type Flags = Pick<EventBatch, 'firstVisitToday' | 'isNewVisitor' | 'newSession'>;
-type State = { queue: AnalyticsEvent[]; flags: Flags; referrer: string; utmSource: string; lastPath: string };
+type State = { queue: AnalyticsEvent[]; flags: Flags; referrer: string; lastPath: string };
 
 let state: State | null | undefined; // undefined = not initialised, null = disabled
 
@@ -69,12 +69,10 @@ function init(): State | null {
   const newSession = !get(sessionStorage, KEYS.session);
   if (newSession) set(sessionStorage, KEYS.session, '1');
 
-  const params = new URLSearchParams(location.search);
   state = {
     queue: [],
     flags: { firstVisitToday, isNewVisitor, newSession },
     referrer: newSession ? document.referrer.slice(0, 300) : '',
-    utmSource: newSession ? (params.get('utm_source') ?? '').slice(0, 60) : '',
     lastPath: '',
   };
 
@@ -94,14 +92,12 @@ function flush(): void {
   const batch: EventBatch = {
     ...s.flags,
     referrer: s.referrer,
-    utmSource: s.utmSource,
     events: s.queue.splice(0, 30),
   };
   const body = JSON.stringify(batch);
   // One-time flags are sent exactly once.
   s.flags = { firstVisitToday: false, isNewVisitor: false, newSession: false };
   s.referrer = '';
-  s.utmSource = '';
 
   const sent = navigator.sendBeacon?.(ENDPOINT, new Blob([body], { type: 'text/plain' }));
   if (!sent) void fetch(ENDPOINT, { method: 'POST', body, keepalive: true }).catch(() => undefined);

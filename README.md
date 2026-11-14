@@ -69,8 +69,8 @@ No Google Analytics and no third-party trackers: a ~2 KB tracker in the site bat
 - **Free-tier friendly:** the browser computes "first visit today / new visitor / new session", so the
   server never reads before writing. Each beacon is **one** blind `increment` write into a small
   `stats_daily/{date}` document; no raw events are stored.
-- **Dashboard** (`/admin`): totals vs the previous period, visits per day, sources and UTM campaigns,
-  section reach, top pages, link clicks, devices/browsers/OS, busiest hours, conversion rates,
+- **Dashboard** (`/admin`): totals vs the previous period, visits per day, traffic sources,
+  section reach, top pages, link clicks, busiest hours, conversion rates,
   plain-language insights, and CSV export. A 90-day view reads at most ~180 small documents.
 
 ## Run locally
