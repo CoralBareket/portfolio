@@ -69,5 +69,10 @@ const envSchema = z
 
 export type Env = z.infer<typeof envSchema>;
 
-export const env: Env = envSchema.parse(process.env);
+/** `KEY=` with nothing after it means "not set", so defaults (e.g. dev test keys) still apply. */
+const nonEmpty = Object.fromEntries(
+  Object.entries(process.env).filter(([, v]) => v !== undefined && v !== ''),
+);
+
+export const env: Env = envSchema.parse(nonEmpty);
 export const isProd = env.NODE_ENV === 'production';
