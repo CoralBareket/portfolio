@@ -3,7 +3,7 @@ import { classifyReferrer } from '../lib/referrer';
 import { statsRepository, type StatIncrements } from '../repositories/stats.repository';
 
 /** Only known site sections are counted, so arbitrary strings can't bloat the stats doc. */
-const SECTIONS = new Set(['top', 'stack', 'focus', 'experience', 'projects', 'about', 'contact']);
+const SECTIONS = new Set(['stack', 'focus', 'experience', 'projects', 'about', 'contact']);
 
 const bump = (map: Record<string, number>, key: string, by = 1) => {
   map[key] = (map[key] ?? 0) + by;

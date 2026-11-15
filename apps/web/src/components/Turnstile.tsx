@@ -1,7 +1,10 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 
-/** Cloudflare's documented always-pass test key, used when no real key is configured (dev). */
-const TEST_SITE_KEY = '1x00000000000000000000AA';
+/**
+ * Cloudflare's documented always-pass *invisible* test key, used when no real key is configured
+ * (dev). The visible test key renders a "testing only" banner, so we avoid it.
+ */
+const TEST_SITE_KEY = '1x00000000000000000000BB';
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 type TurnstileApi = {
@@ -61,6 +64,8 @@ export const Turnstile = forwardRef<TurnstileHandle, { onToken: (token: string) 
             widgetId.current = window.turnstile.render(el, {
               sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || TEST_SITE_KEY,
               theme: 'dark',
+              // Stay invisible unless Cloudflare actually needs the visitor to click something.
+              appearance: 'interaction-only',
               callback: (token: string) => onTokenRef.current(token),
               'expired-callback': () => onTokenRef.current(''),
               'error-callback': () => onTokenRef.current(''),
@@ -79,5 +84,5 @@ export const Turnstile = forwardRef<TurnstileHandle, { onToken: (token: string) 
     };
   }, []);
 
-  return <div ref={container} className="min-h-[65px]" />;
+  return <div ref={container} />;
 });

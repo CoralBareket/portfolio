@@ -11,7 +11,7 @@ export type SectionDef = { id: SectionId; label: string; slug: string };
 
 const ALL_SECTIONS: SectionDef[] = [
   { id: 'stack', label: 'Stack', slug: 'tech_stack' },
-  { id: 'focus', label: 'Focus', slug: 'engineering_focus' },
+  { id: 'focus', label: 'Range', slug: 'engineering_focus' },
   { id: 'experience', label: 'Experience', slug: 'experience' },
   { id: 'projects', label: 'Projects', slug: 'projects' },
   { id: 'about', label: 'About', slug: 'about' },

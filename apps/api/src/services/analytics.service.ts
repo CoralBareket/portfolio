@@ -7,7 +7,7 @@ const RANGE_DAYS: Record<Exclude<AnalyticsRange, 'all'>, number> = { '7d': 7, '3
 const SECTION_ORDER = ['stack', 'focus', 'experience', 'projects', 'about', 'contact'];
 const SECTION_NAMES: Record<string, string> = {
   stack: 'Tech Stack',
-  focus: 'Engineering Focus',
+  focus: 'Range',
   experience: 'Experience',
   projects: 'Projects',
   about: 'About',

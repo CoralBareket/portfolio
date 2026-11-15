@@ -47,7 +47,7 @@ export function ProjectPage() {
               <title>Project not found · Coral Bareket</title>
               <meta name="robots" content="noindex" />
             </Head>
-            <h1 className="mt-10 font-serif text-4xl">Project not found</h1>
+            <h1 className="mt-10 text-4xl font-semibold tracking-tight">Project not found</h1>
           </>
         )}
         {state.status === 'ready' && <ProjectDetail project={state.project} />}
@@ -78,37 +78,37 @@ function ProjectDetail({ project: p }: { project: Project }) {
         <span className="mx-2 text-faint">/</span>
         Case study
       </p>
-      <h1 className="mt-5 text-[clamp(2.6rem,7vw,5rem)] leading-[0.95] font-medium tracking-[-0.035em]">
+      <h1 className="mt-5 text-[clamp(2.6rem,7vw,5rem)] leading-[0.95] font-semibold tracking-[-0.045em]">
         {p.title}
       </h1>
-      {p.subtitle && <p className="mt-4 font-serif text-2xl text-muted italic">{p.subtitle}</p>}
+      {p.subtitle && <p className="mt-4 text-2xl text-accent">{p.subtitle}</p>}
       {p.description && <p className="mt-5 text-lg leading-relaxed text-muted">{p.description}</p>}
 
       <div className="mt-6 flex flex-wrap gap-3">
         {p.repoUrl && (
-          <a href={p.repoUrl} data-track="repo" className="link inline-flex items-center gap-2">
+          <a href={p.repoUrl} data-track="repo" className="btn btn-ghost">
             <GithubIcon size={16} /> Source code
           </a>
         )}
         {p.demoUrl && (
-          <a
-            href={p.demoUrl}
-            data-track="demo"
-            className="inline-flex items-center gap-2 border border-accent px-4 py-2 font-medium text-accent transition-colors hover:bg-accent hover:text-bg"
-          >
+          <a href={p.demoUrl} data-track="demo" className="btn btn-primary">
             <ArrowUpRight size={16} aria-hidden="true" /> Live demo
           </a>
         )}
       </div>
 
       {p.cover && (
-        <img src={p.cover.url} alt={`${p.title} screenshot`} className="mt-12 w-full border border-border" />
+        <img
+          src={p.cover.url}
+          alt={`${p.title} screenshot`}
+          className="mt-12 w-full rounded-lg border border-border"
+        />
       )}
 
       {p.tags.length > 0 && (
         <ul className="mt-8 flex flex-wrap gap-2" aria-label="Technologies">
           {p.tags.map((t) => (
-            <li key={t} className="font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
+            <li key={t} className="chip">
               {t}
             </li>
           ))}
@@ -120,14 +120,14 @@ function ProjectDetail({ project: p }: { project: Project }) {
 
       {p.architecture.length > 0 && (
         <section className="mt-12">
-          <h2 className="mb-6 font-serif text-3xl">Architecture</h2>
+          <h2 className="mb-6 text-3xl font-semibold tracking-tight">Architecture</h2>
           <ArchitectureFlow steps={p.architecture} />
         </section>
       )}
 
       {p.keyDecisions.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-serif text-3xl">Key decisions</h2>
+          <h2 className="text-3xl font-semibold tracking-tight">Key decisions</h2>
           <ul className="mt-4 space-y-3">
             {p.keyDecisions.map((d) => (
               <li key={d} className="flex gap-3 text-muted">
@@ -147,7 +147,7 @@ function ProjectDetail({ project: p }: { project: Project }) {
 function Block({ title, children }: { title: string; children: string }) {
   return (
     <section className="mt-12">
-      <h2 className="font-serif text-3xl">{title}</h2>
+      <h2 className="text-3xl font-semibold tracking-tight">{title}</h2>
       <p className="mt-4 leading-relaxed whitespace-pre-line text-muted">{children}</p>
     </section>
   );

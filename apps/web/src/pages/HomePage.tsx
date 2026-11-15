@@ -14,9 +14,9 @@ import { Hero } from '../sections/Hero';
 import { Projects } from '../sections/Projects';
 import { TechStack } from '../sections/TechStack';
 
-const sectionMeta: Record<SectionId, { title: string; intro?: string; Body: () => React.JSX.Element }> = {
-  stack: { title: 'Tech stack', intro: 'Languages, frameworks and tools I work with.', Body: TechStack },
-  focus: { title: 'Engineering focus', intro: 'Where most of my engineering time goes.', Body: Focus },
+const sectionMeta: Record<SectionId, { title: string; Body: () => React.JSX.Element }> = {
+  stack: { title: 'Tech stack', Body: TechStack },
+  focus: { title: 'Range', Body: Focus },
   experience: { title: 'Experience', Body: Experience },
   projects: { title: 'Projects', Body: Projects },
   about: { title: 'About', Body: About },
@@ -43,15 +43,20 @@ function Home() {
       <main id="main">
         <Hero workHref={workHref} />
         {sections.map((s) => {
-          const { title, intro, Body } = sectionMeta[s.id];
+          const { title, Body } = sectionMeta[s.id];
           return (
-            <Section key={s.id} id={s.id} number={s.number} label={s.label} title={title} intro={intro}>
+            <Section key={s.id} id={s.id} number={s.number} title={title} centered={s.id === 'contact'}>
               <Body />
             </Section>
           );
         })}
       </main>
-      <Footer name={content.hero.name} location={content.hero.location} />
+      <Footer
+        name={content.hero.name}
+        location={content.hero.location}
+        linkedin={content.links.linkedin}
+        github={content.links.github}
+      />
     </MotionConfig>
   );
 }

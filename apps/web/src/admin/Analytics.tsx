@@ -6,10 +6,10 @@ import type { AnalyticsRange, AnalyticsSummary } from '@portfolio/shared';
 import { adminFetch, describeError } from './api';
 import { Button, Card, Notice } from './ui';
 
-/** Single-series amber, validated (lightness band + contrast) on the dark card surface. */
-const SERIES = '#D97706';
-const AXIS = '#A89F91';
-const GRID = '#2A251D';
+/** Single-series blue (the site accent) on the dark card surface. */
+const SERIES = '#6AA8FF';
+const AXIS = '#959FAC';
+const GRID = '#1E242E';
 
 const RANGES: { id: AnalyticsRange; label: string }[] = [
   { id: '7d', label: '7 days' },
@@ -20,7 +20,7 @@ const RANGES: { id: AnalyticsRange; label: string }[] = [
 
 const SECTION_LABELS: Record<string, string> = {
   stack: 'Tech Stack',
-  focus: 'Engineering Focus',
+  focus: 'Range',
   experience: 'Experience',
   projects: 'Projects',
   about: 'About',
@@ -219,13 +219,13 @@ function DailyChart({ daily }: { daily: AnalyticsSummary['daily'] }) {
             />
             <Tooltip
               contentStyle={{
-                background: '#0E0C0A',
+                background: '#080A0E',
                 border: `1px solid ${GRID}`,
                 borderRadius: 8,
                 fontSize: 12,
               }}
-              labelStyle={{ color: '#F2EDE4' }}
-              itemStyle={{ color: '#F2EDE4' }}
+              labelStyle={{ color: '#F0F4F8' }}
+              itemStyle={{ color: '#F0F4F8' }}
               labelFormatter={(d) => shortDate(String(d))}
               cursor={{ stroke: AXIS }}
             />

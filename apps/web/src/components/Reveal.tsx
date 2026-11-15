@@ -23,17 +23,3 @@ export function Reveal({
     </motion.div>
   );
 }
-
-/** A hairline that draws itself from left to right when it enters the viewport. */
-export function Rule({ className = '' }: { className?: string }) {
-  return (
-    <motion.div
-      aria-hidden="true"
-      className={`rule ${className}`}
-      initial={{ scaleX: 0 }}
-      whileInView={{ scaleX: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 1.1, ease: [0.2, 0.7, 0.2, 1] }}
-    />
-  );
-}

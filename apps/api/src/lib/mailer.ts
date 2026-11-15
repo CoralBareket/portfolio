@@ -49,7 +49,7 @@ export function contactNotification(input: {
     text: `From: ${input.name} <${input.email}>\n\n${input.message}\n\nReply to this email to answer directly.`,
     html: `<div style="font-family:system-ui,sans-serif;line-height:1.5">
 <p><strong>From:</strong> ${escapeHtml(input.name)} &lt;${escapeHtml(input.email)}&gt;</p>
-<p style="white-space:pre-wrap;border-left:3px solid #F5A524;padding-left:12px">${escapeHtml(input.message)}</p>
+<p style="white-space:pre-wrap;border-left:3px solid #6AA8FF;padding-left:12px">${escapeHtml(input.message)}</p>
 <p style="color:#777;font-size:13px">Reply to this email to answer directly.</p></div>`,
   };
 }

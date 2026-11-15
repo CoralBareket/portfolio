@@ -7,13 +7,13 @@ import type { SiteContent } from './schemas';
 export const defaultContent: SiteContent = {
   hero: {
     name: 'Coral Bareket',
-    title: 'Full-Stack Developer',
-    tagline: 'I build backend systems, data pipelines and the dashboards on top of them.',
+    title: 'Software Engineer',
+    tagline: 'Curious enough to learn any stack, precise enough to ship it right.',
     location: 'Central Israel',
     chips: ['TypeScript', 'NestJS', 'React', 'PostgreSQL', 'ClickHouse', 'AWS'],
   },
   summary:
-    'Full-stack developer with early-stage startup experience. Strong background in backend systems, cloud infrastructure, and data-driven applications, combined with solid frontend skills. Passionate about building scalable systems, solving complex problems, and continuously learning.',
+    "Software engineer who works across the stack: backend, data, frontend and cloud. I learn whatever a problem needs, quickly, and hold the result to a high bar. Early-stage startup experience means I'm used to owning work end to end, from the first schema to production.",
   skills: [
     { name: 'Languages', items: ['JavaScript', 'TypeScript', 'Python', 'C#'] },
     { name: 'Backend', items: ['Node.js', 'NestJS', 'ASP.NET Core', 'Express.js', 'REST APIs'] },
@@ -92,7 +92,7 @@ export const defaultContent: SiteContent = {
   ],
   about: {
     paragraphs: [
-      "I'm a full-stack developer with a B.Sc. in Computer Science from The College of Management. I enjoy building scalable systems, solving complex problems, and continuously learning.",
+      "I'm a software engineer with a B.Sc. in Computer Science from The College of Management. I like problems I haven't solved before: I learn what they need, then build it carefully.",
       "Since 2015 I've volunteered as a medic with Magen David Adom. During my IDF service (2018–2020) I worked as an interviewer.",
     ],
     education: {

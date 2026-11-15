@@ -2,7 +2,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { getFirebase, requireDb } from '../lib/firebase';
 import { israelDay } from '../lib/time';
 
-/** Counter increments: top-level numbers, or one level of named buckets (e.g. pages["/"]). */
+/** Counter increments: top-level numbers, or one level of named buckets (e.g. referrers["Direct"]). */
 export type StatIncrements = Record<string, number | Record<string, number>>;
 
 /** Raw `stats_daily/{YYYY-MM-DD}` document. */

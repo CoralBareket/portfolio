@@ -10,7 +10,7 @@ export function About() {
       'Education',
       <>
         {about.education.degree}
-        <span className="block text-muted">
+        <span className="mt-1 block text-[15px] text-muted">
           {about.education.school} · {about.education.period}
         </span>
       </>,
@@ -19,7 +19,7 @@ export function About() {
       'Service',
       about.service.map((s) => (
         <span key={s.org} className="block">
-          {s.role}, {s.org} <span className="text-muted">· {s.period}</span>
+          {s.role}, {s.org} <span className="block text-[15px] text-muted">{s.period}</span>
         </span>
       )),
     ],
@@ -27,7 +27,7 @@ export function About() {
       'Languages',
       about.languages.map((l) => (
         <span key={l.name} className="block">
-          {l.name} <span className="text-muted">· {l.level}</span>
+          {l.name} <span className="text-[15px] text-muted">· {l.level}</span>
         </span>
       )),
     ],
@@ -36,22 +36,21 @@ export function About() {
   return (
     <div>
       {lead && (
-        <p className="max-w-[30ch] font-serif text-[1.9rem] leading-[1.18] sm:text-[2.3rem]">{lead}</p>
+        <p className="max-w-[40ch] text-[clamp(1.4rem,2.6vw,2rem)] leading-snug font-medium tracking-[-0.02em]">
+          {lead}
+        </p>
       )}
       {rest.map((p) => (
-        <p key={p} className="mt-6 max-w-[58ch] text-lg leading-relaxed text-muted">
+        <p key={p} className="mt-6 max-w-[62ch] text-lg leading-relaxed text-muted">
           {p}
         </p>
       ))}
 
-      <dl className="mt-14 border-b border-border">
+      <dl className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {facts.map(([term, value]) => (
-          <div
-            key={term}
-            className="grid grid-cols-1 gap-2 border-t border-border py-5 sm:grid-cols-[170px_1fr] sm:gap-6"
-          >
-            <dt className="label pt-[5px]">{term}</dt>
-            <dd className="text-[17px] leading-relaxed">{value}</dd>
+          <div key={term} className="card card-hover p-6">
+            <dt className="label">{term}</dt>
+            <dd className="mt-4 space-y-3 text-[16px] leading-snug">{value}</dd>
           </div>
         ))}
       </dl>

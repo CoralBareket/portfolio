@@ -1,6 +1,7 @@
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowRight, Mail } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
 import { contactInputSchema } from '@portfolio/shared';
+import { GithubIcon, LinkedinIcon } from '../components/icons';
 import { Turnstile, type TurnstileHandle } from '../components/Turnstile';
 import { useContent } from '../lib/content';
 
@@ -8,9 +9,8 @@ const fieldsSchema = contactInputSchema.pick({ name: true, email: true, message:
 type Field = 'name' | 'email' | 'message';
 type Status = 'idle' | 'sending' | 'sent' | 'error' | 'captcha' | 'limited';
 
-/** Underline-only fields, like filling in a form on a printed sheet. */
 const inputClass =
-  'mt-2 w-full border-0 border-b border-rule bg-transparent px-0 py-2 text-[17px] text-text transition-colors placeholder:text-faint focus:border-accent focus:outline-none focus-visible:outline-none';
+  'mt-2 w-full rounded-md border border-rule bg-bg px-3.5 py-2.5 text-[16px] text-text transition-colors placeholder:text-faint focus:border-accent focus:outline-none focus-visible:outline-none';
 
 export function Contact() {
   const { content } = useContent();
@@ -67,8 +67,19 @@ export function Contact() {
   }
 
   const elsewhere = [
-    { href: links.linkedin, label: 'LinkedIn', text: 'in/coral-bareket' },
-    { href: links.github, label: 'GitHub', text: 'github.com/CoralBareket' },
+    { href: `mailto:${links.email}`, label: 'Email', aria: `Email ${links.email}`, icon: <Mail size={16} /> },
+    {
+      href: links.linkedin,
+      label: 'LinkedIn',
+      aria: 'LinkedIn: in/coral-bareket',
+      icon: <LinkedinIcon size={16} />,
+    },
+    {
+      href: links.github,
+      label: 'GitHub',
+      aria: 'GitHub: github.com/CoralBareket',
+      icon: <GithubIcon size={16} />,
+    },
   ];
 
   const field = (name: Field, label: string, input: React.ReactNode) => (
@@ -90,45 +101,37 @@ export function Contact() {
   });
 
   return (
-    <div className="grid grid-cols-1 gap-14 lg:grid-cols-[1fr_1.15fr] lg:gap-12">
-      <div>
-        <p className="max-w-[28ch] font-serif text-[1.9rem] leading-[1.18] sm:text-[2.3rem]">
-          Have a role, a project or a question? I&apos;d like to hear about it.
-        </p>
-        <a
-          href={`mailto:${links.email}`}
-          aria-label={`Email ${links.email}`}
-          className="group mt-8 inline-flex items-center gap-2 text-lg break-all sm:text-xl"
-        >
-          <span className="link">{links.email}</span>
-          <ArrowUpRight
-            size={18}
-            aria-hidden="true"
-            className="text-accent transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-          />
-        </a>
-        <dl className="mt-10 border-b border-border">
-          {elsewhere.map((l) => (
-            <div key={l.label} className="grid grid-cols-[110px_1fr] border-t border-border py-4">
-              <dt className="label pt-[3px]">{l.label}</dt>
-              <dd>
-                <a
-                  href={l.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${l.label}: ${l.text}`}
-                  className="link"
-                >
-                  {l.text}
-                </a>
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
+    <div className="mx-auto max-w-2xl">
+      <p className="mx-auto max-w-[44ch] text-center text-lg leading-relaxed text-muted">
+        Got a problem worth solving? Whatever the stack, I&apos;d like to hear about it.
+      </p>
+      <ul className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+        {elsewhere.map((l) => {
+          const external = !l.href.startsWith('mailto:');
+          return (
+            <li key={l.label}>
+              <a
+                href={l.href}
+                aria-label={l.aria}
+                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                className="btn btn-ghost w-full min-w-[140px]"
+              >
+                <span aria-hidden="true">{l.icon}</span>
+                {l.label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
 
-      <form noValidate onSubmit={onSubmit} aria-describedby="contact-status" className="relative space-y-8">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+      <form
+        noValidate
+        onSubmit={onSubmit}
+        aria-describedby="contact-status"
+        className="card relative mt-12 space-y-6 p-6 text-left sm:p-8"
+      >
+        <p className="label">Or send a message</p>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {field(
             'name',
             'Name',
@@ -181,7 +184,7 @@ export function Contact() {
           <button
             type="submit"
             disabled={status === 'sending'}
-            className="group inline-flex items-center gap-2 border border-accent px-5 py-2.5 font-medium text-accent transition-colors hover:bg-accent hover:text-bg disabled:opacity-60"
+            className="btn btn-primary group disabled:opacity-60"
           >
             {status === 'sending' ? 'Sending…' : 'Send message'}
             <ArrowRight
@@ -191,11 +194,11 @@ export function Contact() {
             />
           </button>
           <p id="contact-status" role="status" className="text-sm">
-            {status === 'sent' && (
-              <span className="text-accent">Thanks! I&apos;ll get back to you soon.</span>
-            )}
+            {status === 'sent' && <span className="text-teal">Thanks! I&apos;ll get back to you soon.</span>}
             {status === 'captcha' && (
-              <span className="text-red-300">Please complete the quick check above first.</span>
+              <span className="text-red-300">
+                Still checking you&apos;re not a bot. Please try again in a moment.
+              </span>
             )}
             {status === 'limited' && (
               <span className="text-red-300">
