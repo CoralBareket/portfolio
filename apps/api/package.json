@@ -7,7 +7,7 @@
     "dev": "tsx watch --env-file-if-exists=../../.env.local src/dev-server.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --dir src",
-    "test:emulators": "vitest run --dir tests",
+    "test:emulators": "vitest run --dir tests --no-file-parallelism",
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
@@ -16,6 +16,7 @@
     "@portfolio/shared": "workspace:*",
     "firebase-admin": "^14.5.1",
     "hono": "^4.13.18",
+    "isbot": "^5.2.3",
     "pino": "^10.4.0",
     "zod": "^4.6.7"
   },

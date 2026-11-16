@@ -1,0 +1,154 @@
+import { ArrowLeft, ArrowUpRight } from 'lucide-react';
+import { MotionConfig } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Head } from 'vite-react-ssg';
+import type { Project } from '@portfolio/shared';
+import { ArchitectureFlow } from '../components/ArchitectureFlow';
+import { GithubIcon } from '../components/icons';
+import { buildData } from '../lib/build-data';
+import { SITE_URL } from '../lib/site';
+import { usePageTracking } from '../lib/usePageTracking';
+
+type State = { status: 'loading' } | { status: 'missing' } | { status: 'ready'; project: Project };
+
+/**
+ * Published projects are pre-rendered from the build snapshot (full HTML + meta tags);
+ * newer ones are served a loading shell and fetched. Either way, the API refreshes the data.
+ */
+export function ProjectPage() {
+  usePageTracking();
+  const { slug = '' } = useParams();
+  const initial = buildData.projects.find((p) => p.slug === slug);
+  const [state, setState] = useState<State>(
+    initial ? { status: 'ready', project: initial } : { status: 'loading' },
+  );
+
+  useEffect(() => {
+    fetch(`/api/projects/${encodeURIComponent(slug)}`)
+      .then((res) => (res.ok ? (res.json() as Promise<{ project: Project }>) : Promise.reject(new Error())))
+      .then(({ project }) => setState({ status: 'ready', project }))
+      .catch(() => setState((prev) => (prev.status === 'ready' ? prev : { status: 'missing' })));
+  }, [slug]);
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <main id="main" className="mx-auto max-w-4xl px-4 py-12 sm:px-8 sm:py-16">
+        <a
+          href="/#projects"
+          className="inline-flex items-center gap-2 font-mono text-sm text-muted hover:text-accent"
+        >
+          <ArrowLeft size={16} aria-hidden="true" /> back to portfolio
+        </a>
+        {state.status === 'loading' && <p className="mt-10 text-muted">Loading project…</p>}
+        {state.status === 'missing' && (
+          <>
+            <Head>
+              <title>Project not found · Coral Bareket</title>
+              <meta name="robots" content="noindex" />
+            </Head>
+            <h1 className="mt-10 text-4xl font-semibold tracking-tight">Project not found</h1>
+          </>
+        )}
+        {state.status === 'ready' && <ProjectDetail project={state.project} />}
+      </main>
+    </MotionConfig>
+  );
+}
+
+function ProjectDetail({ project: p }: { project: Project }) {
+  const url = `${SITE_URL}/projects/${p.slug}`;
+  const description = p.description || p.subtitle;
+  return (
+    <article className="mt-10">
+      <Head>
+        <title>{`${p.title} · Coral Bareket`}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={url} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={p.title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={url} />
+        <meta property="og:image" content={p.cover?.url ?? `${SITE_URL}/og.png`} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Head>
+
+      <p className="label">
+        <span className="text-accent">Project</span>
+        <span className="mx-2 text-faint">/</span>
+        Case study
+      </p>
+      <h1 className="mt-5 text-[clamp(2.6rem,7vw,5rem)] leading-[0.95] font-semibold tracking-[-0.045em]">
+        {p.title}
+      </h1>
+      {p.subtitle && <p className="mt-4 text-2xl text-accent">{p.subtitle}</p>}
+      {p.description && <p className="mt-5 text-lg leading-relaxed text-muted">{p.description}</p>}
+
+      <div className="mt-6 flex flex-wrap gap-3">
+        {p.repoUrl && (
+          <a href={p.repoUrl} data-track="repo" className="btn btn-ghost">
+            <GithubIcon size={16} /> Source code
+          </a>
+        )}
+        {p.demoUrl && (
+          <a href={p.demoUrl} data-track="demo" className="btn btn-primary">
+            <ArrowUpRight size={16} aria-hidden="true" /> Live demo
+          </a>
+        )}
+      </div>
+
+      {p.cover && (
+        <img
+          src={p.cover.url}
+          alt={`${p.title} screenshot`}
+          className="mt-12 w-full rounded-lg border border-border"
+        />
+      )}
+
+      {p.tags.length > 0 && (
+        <ul className="mt-8 flex flex-wrap gap-2" aria-label="Technologies">
+          {p.tags.map((t) => (
+            <li key={t} className="chip">
+              {t}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {p.problem && <Block title="The problem">{p.problem}</Block>}
+      {p.approach && <Block title="My approach">{p.approach}</Block>}
+
+      {p.architecture.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-6 text-3xl font-semibold tracking-tight">Architecture</h2>
+          <ArchitectureFlow steps={p.architecture} />
+        </section>
+      )}
+
+      {p.keyDecisions.length > 0 && (
+        <section className="mt-12">
+          <h2 className="text-3xl font-semibold tracking-tight">Key decisions</h2>
+          <ul className="mt-4 space-y-3">
+            {p.keyDecisions.map((d) => (
+              <li key={d} className="flex gap-3 text-muted">
+                <span aria-hidden="true" className="font-mono text-accent">
+                  ▹
+                </span>
+                {d}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </article>
+  );
+}
+
+function Block({ title, children }: { title: string; children: string }) {
+  return (
+    <section className="mt-12">
+      <h2 className="text-3xl font-semibold tracking-tight">{title}</h2>
+      <p className="mt-4 leading-relaxed whitespace-pre-line text-muted">{children}</p>
+    </section>
+  );
+}

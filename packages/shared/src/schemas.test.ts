@@ -12,12 +12,22 @@ describe('shared schemas', () => {
     expect(siteContentSchema.safeParse(defaultContent).success).toBe(true);
   });
 
-  it('rejects a filled honeypot on the contact form', () => {
+  it('accepts the honeypot field so bots cannot tell they were caught', () => {
     const result = contactInputSchema.safeParse({
       name: 'Bot',
       email: 'bot@example.com',
       message: 'Buy cheap things now!!',
       website: 'http://spam.example',
+      turnstileToken: 'x',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an invalid contact email', () => {
+    const result = contactInputSchema.safeParse({
+      name: 'A',
+      email: 'not-an-email',
+      message: 'Hello there, nice site!',
       turnstileToken: 'x',
     });
     expect(result.success).toBe(false);
@@ -30,8 +40,6 @@ describe('shared schemas', () => {
 
   it('caps event batches at 30 events', () => {
     const events = Array.from({ length: 31 }, () => ({ type: 'pageview' as const, path: '/' }));
-    expect(eventBatchSchema.safeParse({ firstVisitToday: true, isNewVisitor: true, events }).success).toBe(
-      false,
-    );
+    expect(eventBatchSchema.safeParse({ newSession: true, events }).success).toBe(false);
   });
 });

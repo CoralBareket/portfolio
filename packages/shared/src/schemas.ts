@@ -78,15 +78,53 @@ export const projectInputSchema = z.object({
 export type ProjectInput = z.infer<typeof projectInputSchema>;
 export type Project = ProjectInput & { id: string; updatedAt: string };
 
-/** Contact form. `website` is a honeypot: humans never fill it in. */
+/**
+ * Contact form. `website` is a honeypot: humans never fill it in. It is accepted by the schema
+ * (so bots get a normal-looking success) and silently dropped by the service.
+ */
 export const contactInputSchema = z.object({
   name: z.string().trim().min(1).max(100),
   email: z.email().max(200),
   message: z.string().trim().min(10).max(5000),
-  website: z.string().max(0).optional(),
+  website: z.string().max(500).optional(),
   turnstileToken: z.string().min(1).max(4096),
 });
 export type ContactInput = z.infer<typeof contactInputSchema>;
+
+export const messageStatuses = ['unread', 'read', 'archived'] as const;
+export type MessageStatus = (typeof messageStatuses)[number];
+export type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  status: MessageStatus;
+  createdAt: string;
+};
+export const messageUpdateSchema = z.object({ status: z.enum(messageStatuses) });
+
+/** The current CV file (stored at `cv/current`). */
+export const cvInputSchema = z.object({
+  url: z.url(),
+  publicId: z.string().min(1).max(300),
+  fileName: z.string().min(1).max(200),
+});
+export type CvInfo = z.infer<typeof cvInputSchema> & { uploadedAt: string };
+
+/** Admin asks the API for a signed, direct-to-Cloudinary upload. */
+export const uploadKinds = ['image', 'cv'] as const;
+export const uploadSignRequestSchema = z.object({ kind: z.enum(uploadKinds) });
+export type UploadSignature = {
+  uploadUrl: string;
+  fields: Record<string, string>;
+};
+
+/** Public payload of GET /api/content. */
+export type PublicContentResponse = {
+  content: SiteContent;
+  projects: Project[];
+  cvAvailable: boolean;
+};
 
 /** First-party analytics batch, sent with navigator.sendBeacon to POST /api/events. */
 export const clickTargets = ['linkedin', 'github', 'email', 'repo', 'demo', 'cv'] as const;
@@ -95,16 +133,42 @@ export const analyticsEventSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('section_view'), section: z.string().max(40) }),
   z.object({ type: z.literal('click'), target: z.enum(clickTargets) }),
 ]);
+/**
+ * One analytics batch. The only state the browser keeps is a per-tab session flag
+ * (sessionStorage), so there is no long-lived visitor ID at all.
+ */
 export const eventBatchSchema = z.object({
-  /** True the first time this browser is seen today (Israel time), so uniques need no DB read. */
-  firstVisitToday: z.boolean(),
-  isNewVisitor: z.boolean(),
+  /** First batch of a browser session → counts one visit, with its traffic source. */
+  newSession: z.boolean(),
   referrer: z.string().max(300).default(''),
-  utmSource: z.string().max(60).default(''),
-  events: z.array(analyticsEventSchema).min(1).max(30),
+  events: z.array(analyticsEventSchema).max(30),
 });
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>;
 export type EventBatch = z.infer<typeof eventBatchSchema>;
+
+export const analyticsRanges = ['7d', '30d', '90d', 'all'] as const;
+export type AnalyticsRange = (typeof analyticsRanges)[number];
+
+export type AnalyticsTotals = {
+  pageviews: number;
+  /** Visits (browser sessions): the denominator for source and section-reach shares. */
+  sessions: number;
+  cvDownloads: number;
+  contacts: number;
+};
+
+export type AnalyticsSummary = {
+  range: AnalyticsRange;
+  from: string;
+  to: string;
+  totals: AnalyticsTotals;
+  daily: { date: string; pageviews: number }[];
+  /** Breakdowns, each sorted by count (desc). */
+  referrers: [string, number][];
+  sections: [string, number][];
+  clicks: [string, number][];
+  insights: string[];
+};
 
 /** API error envelope used by every endpoint. */
 export type ApiError = { error: { code: string; message: string; details?: unknown } };
