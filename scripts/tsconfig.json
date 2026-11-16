@@ -1,5 +1,9 @@
 {
   "extends": "../tsconfig.base.json",
-  "compilerOptions": { "types": ["node"] },
+  "compilerOptions": {
+    "types": ["node"],
+    // generate-og.ts runs a callback inside the browser via Playwright's page.evaluate.
+    "lib": ["ES2023", "DOM"]
+  },
   "include": ["*.ts"]
 }

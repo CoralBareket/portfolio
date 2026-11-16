@@ -69,6 +69,11 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
           VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
 
+      - name: Smoke tests on the production build (Playwright)
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm test:e2e
+
       # ---------- Deploy (only reached when every check passed) ----------
       - name: Deploy Firestore rules and indexes
         env:

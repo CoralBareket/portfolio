@@ -13,7 +13,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "pnpm -r typecheck && tsc -p scripts",
+    "typecheck": "pnpm -r typecheck && tsc -p scripts && tsc -p e2e",
     "test": "pnpm -r test",
     "test:emulators": "firebase emulators:exec --project demo-portfolio --config firebase/firebase.json --only firestore,auth \"pnpm -r test:emulators\"",
     "build": "pnpm -r build",
@@ -21,7 +21,9 @@
     "seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
     "admin:grant": "tsx --env-file-if-exists=.env.local scripts/grant-admin.ts",
     "build:vercel": "tsx scripts/build-vercel.ts",
-    "setup:production": "tsx --env-file=.env.production.local scripts/setup-production.ts"
+    "setup:production": "tsx --env-file=.env.production.local scripts/setup-production.ts",
+    "og": "tsx scripts/generate-og.ts",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
