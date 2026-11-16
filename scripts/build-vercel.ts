@@ -19,6 +19,26 @@ const SITE_URL = (process.env.VITE_SITE_URL ?? 'https://coralbareket.vercel.app'
 
 const run = (cmd: string) => execSync(cmd, { stdio: 'inherit', env: process.env });
 
+// In CI these are baked into the browser bundle. Missing ones would silently ship a site whose
+// admin sign-in is off and whose contact form uses Turnstile's test key, so stop the deploy instead.
+if (process.env.CI) {
+  const publicVars = [
+    'VITE_FIREBASE_API_KEY',
+    'VITE_FIREBASE_AUTH_DOMAIN',
+    'VITE_FIREBASE_PROJECT_ID',
+    'VITE_FIREBASE_APP_ID',
+    'VITE_TURNSTILE_SITE_KEY',
+  ];
+  const missing = publicVars.filter((k) => !process.env[k]?.trim());
+  if (missing.length) {
+    console.error(
+      `✗ Missing build variables: ${missing.join(', ')}.\n` +
+        '  Add them under GitHub → Settings → Secrets and variables → Actions → *Variables* tab (not Secrets).',
+    );
+    process.exit(1);
+  }
+}
+
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name);
