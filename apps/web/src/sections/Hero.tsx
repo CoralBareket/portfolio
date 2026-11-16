@@ -1,9 +1,6 @@
 import { ArrowDown, ArrowDownRight, ArrowRight } from 'lucide-react';
-import { motion } from 'motion/react';
 import { useContent } from '../lib/content';
 import { CodeWorld } from './CodeWorld';
-
-const ease = [0.2, 0.7, 0.2, 1] as const;
 
 export function Hero({ workHref }: { workHref: string }) {
   const { content, cvAvailable } = useContent();
@@ -29,14 +26,10 @@ export function Hero({ workHref }: { workHref: string }) {
             {hero.title}
           </p>
 
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease }}
-            className="mt-4 max-w-[36ch] text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-muted"
-          >
+          {/* Visible in the pre-rendered HTML: it's usually the largest element on phones (LCP). */}
+          <p className="mt-4 max-w-[36ch] text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-muted">
             {hero.tagline}
-          </motion.p>
+          </p>
 
           <ul className="mt-7 flex max-w-xl flex-wrap gap-2" aria-label="Main technologies">
             {hero.chips.map((chip) => (
