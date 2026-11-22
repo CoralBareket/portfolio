@@ -99,6 +99,12 @@
     @apply -translate-y-0.5 border-rule shadow-[0_24px_60px_rgb(0_0_0/0.35)];
   }
 
+  /* Screenshot frame: the cover sits in a darker inset with a hairline top highlight. */
+  .cover-frame {
+    @apply relative overflow-hidden rounded-md border border-border bg-bg;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  }
+
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 text-[15px] font-medium transition;
   }

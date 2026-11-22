@@ -6,6 +6,12 @@ import { HomePage } from './HomePage';
 // <Head> is rendered by vite-react-ssg at build time; it has no visible output to test here.
 vi.mock('vite-react-ssg', () => ({ Head: () => null }));
 
+// Ignore any local build snapshot (apps/web/src/generated) so the tests see the CV defaults.
+vi.mock('../lib/build-data', async () => {
+  const { defaultContent } = await import('@portfolio/shared');
+  return { buildData: { content: defaultContent, projects: [], cvAvailable: false } };
+});
+
 const renderHome = () =>
   render(
     <MemoryRouter>
