@@ -31,6 +31,21 @@ on the next deploy. Until then it still works, and shows "Loading project…" fo
 
 To hide the Projects section entirely, use Admin → **Content** → Settings.
 
+### Or seed a project from a file
+
+For a longer write-up it's easier to edit a file. Put `scripts/projects/<slug>.json` (same fields
+as the admin form) and an optional `<slug>.png` cover (16:10, e.g. 1600×1000; other ratios are letterboxed on the case study and cropped from the top on the card) next to each other, then:
+
+```bash
+pnpm seed:project <slug>            # dev (.env.local)
+pnpm seed:project <slug> --force    # overwrite an existing project with that slug
+pnpm exec tsx --env-file=.env.production.local scripts/seed-project.ts <slug>   # production
+```
+
+The cover is uploaded to Cloudinary under `<CLOUDINARY_FOLDER>/projects/<id>`, so the admin panel
+can edit or replace it later. The production env file needs the `CLOUDINARY_*` keys with
+`CLOUDINARY_FOLDER=portfolio`.
+
 ## Update your CV
 
 Admin → **CV** → **Replace CV (PDF)**. The old file is deleted from Cloudinary. Use "test download" to check it.

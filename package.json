@@ -19,6 +19,7 @@
     "build": "pnpm -r build",
     "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build",
     "seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
+    "seed:project": "tsx --env-file-if-exists=.env.local scripts/seed-project.ts",
     "admin:grant": "tsx --env-file-if-exists=.env.local scripts/grant-admin.ts",
     "build:vercel": "tsx scripts/build-vercel.ts",
     "setup:production": "tsx --env-file=.env.production.local scripts/setup-production.ts",
