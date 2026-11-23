@@ -83,6 +83,21 @@ test.describe('public site', () => {
     expect(errors).toEqual([]);
   });
 
+  test('a project card opens its pre-rendered case study', async ({ page }) => {
+    const errors = watchForErrors(page);
+    await page.goto('/');
+    const card = page.locator('#projects a[href^="/projects/"]').first();
+    test.skip((await card.count()) === 0, 'this build has no published projects');
+    const title = (await card.getByRole('heading', { level: 3 }).textContent())?.trim() ?? '';
+    expect(title).not.toBe('');
+    await card.scrollIntoViewIfNeeded();
+    await card.click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
+    await expect(page).toHaveTitle(`${title} · Coral Bareket`);
+    await page.waitForLoadState('networkidle');
+    expect(errors).toEqual([]);
+  });
+
   test('unknown project slugs get the loading shell, unknown pages a 404', async ({ page }) => {
     await page.goto('/projects/not-published-yet');
     await expect(page.getByText(/Project not found|Loading project/)).toBeVisible();

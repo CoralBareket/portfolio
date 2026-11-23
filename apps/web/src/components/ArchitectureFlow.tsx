@@ -4,13 +4,10 @@ import type { Project } from '@portfolio/shared';
 export function ArchitectureFlow({ steps }: { steps: Project['architecture'] }) {
   if (steps.length === 0) return null;
   return (
-    <ol
-      className="flex flex-col items-stretch gap-2 lg:flex-row lg:items-center"
-      aria-label="Architecture flow"
-    >
+    <ol className="flex flex-col items-stretch gap-2 lg:flex-row" aria-label="Architecture flow">
       {steps.map((s, i) => (
         <li key={`${s.step}-${i}`} className="flex flex-col items-center gap-2 lg:flex-1 lg:flex-row">
-          <div className="card w-full p-4">
+          <div className="card w-full p-4 lg:self-stretch">
             <p className="font-mono text-[10px] tracking-[0.14em] text-faint">
               S.{String(i + 1).padStart(2, '0')}
             </p>

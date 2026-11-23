@@ -1,0 +1,30 @@
+{
+  "slug": "tower-hop",
+  "title": "TowerHop",
+  "subtitle": "An endless climbing game with accounts and a cheat-resistant global leaderboard",
+  "description": "A Phaser platformer on a full-stack TypeScript monorepo: Fastify API, Drizzle on Neon Postgres, hashed sessions and server-side score validation. Zero-setup locally thanks to Postgres-in-WASM.",
+  "problem": "I wanted a small game that is fun for 30 seconds but still needs real backend work: accounts, saved scores and a global leaderboard that can't be faked with one curl request. It had to run locally with zero setup and cost nothing to host.",
+  "approach": "An npm-workspaces monorepo. The Phaser client keeps its game rules in pure, unit-tested modules. A Fastify API owns auth, scores and the leaderboard. A shared package holds the zod schemas and score rules both sides import. In production one Render service serves the built game and the API from the same origin, backed by Neon Postgres. Locally the same code runs against PGlite, Postgres compiled to WASM, so npm install and npm run dev is the whole setup.",
+  "keyDecisions": [
+    "PGlite locally and in tests, Neon in production: one Drizzle schema and real Postgres everywhere, no Docker and no mocks.",
+    "Sessions are random 256-bit tokens in an HttpOnly cookie; only their SHA-256 is stored, so a database leak exposes no live sessions.",
+    "Passwords hashed with argon2id, with equal login timing whether or not the user exists.",
+    "Server-side score plausibility (floor×10 ≤ score ≤ floor×10 + floor², plus a climb-speed check) rejects forged scores; deterministic rules leave room for full replay validation later.",
+    "zod schemas and score rules live in a shared package, so the client and the API can never disagree on the contract.",
+    "The server runs TypeScript directly on Node 24 type stripping: no server build step."
+  ],
+  "architecture": [
+    { "step": "Phaser client", "detail": "TypeScript + Vite; pure game rules in src/core, HTML login form" },
+    {
+      "step": "Fastify API",
+      "detail": "Auth, scores, leaderboard; rate-limited; same origin, httpOnly cookie"
+    },
+    { "step": "Drizzle ORM", "detail": "Typed schema; migrations run on startup" },
+    { "step": "Postgres", "detail": "Neon in production, PGlite (WASM) locally and in tests" }
+  ],
+  "tags": ["TypeScript", "Phaser", "Vite", "Fastify", "Drizzle", "PostgreSQL", "Neon", "Zod", "Render"],
+  "repoUrl": "https://github.com/CoralBareket/tower-hop",
+  "demoUrl": "https://tower-hop.onrender.com/",
+  "order": 0,
+  "published": true
+}
